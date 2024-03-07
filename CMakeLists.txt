@@ -21,7 +21,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # spdlog
 if(NOT TARGET spdlog)
     find_package(spdlog REQUIRED)
-#    target_link_libraries(example PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
+    link_libraries(spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
 endif()
 
 # yaml-cpp

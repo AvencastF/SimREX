@@ -12,4 +12,14 @@ SimREX::GEM::hit::~hit() {
 
     clear(_e);
     clear(_t);
+    clear(_particle_contributions);
 }
+
+void SimREX::GEM::hit::addParticleContribution(SimREX::GEM::particle_state *state) {
+    _particle_contributions.push_back(state);
+
+    if (state->hit != this) {
+        state->hit = this;
+    }
+}
+

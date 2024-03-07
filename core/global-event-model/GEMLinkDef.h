@@ -20,9 +20,10 @@
 #pragma link C++ class SimREX::GEM::hit+;
 #pragma link C++ class std::vector<SimREX::GEM::hit*>+;
 
-//#pragma link C++ class DParticle+;
-//#pragma link C++ class std::vector<DParticle*>+;
-
+#pragma link C++ class SimREX::GEM::particle+;
+#pragma link C++ class std::vector<SimREX::GEM::particle*>+;
+#pragma link C++ class SimREX::GEM::particle_state+;
+#pragma link C++ class std::vector<SimREX::GEM::particle_state*>+;
 
 #endif
 
