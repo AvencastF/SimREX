@@ -26,7 +26,7 @@ endif()
 
 # yaml-cpp
 find_package(yaml-cpp REQUIRED)
-link_libraries(yaml-cpp)
+link_libraries(yaml-cpp::yaml-cpp)
 
 # XercesC
 find_package(XercesC REQUIRED)

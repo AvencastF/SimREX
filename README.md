@@ -16,6 +16,11 @@ SimREX is the next-generation Simulation and Reconstruction Framework for the fu
 
 ## Software Installation
 
+### CERN ROOT
+```bash
+cmake ../root-master -Dpython3=ON -DPYTHON_EXECUTABLE=/Users/avencast/miniconda3/bin/python3 -DCMAKE_INSTALL_PREFIX=/Applications/ROOT/install  -DCMAKE_CXX_STANDARD=20 -Dbuiltin_glew=ON
+```
+
 ### Geant4.11
 ```bash
 cmake ../src -DCMAKE_INSTALL_PREFIX=/Applications/Geant4.11/install -DGEANT4_USE_GDML=ON -DGEANT4_USE_QT=ON -DCMAKE_CXX_STANDARD=20 -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_SYSTEM_EXPAT=OFF 
