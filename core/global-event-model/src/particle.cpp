@@ -6,7 +6,7 @@
 
 
 void SimREX::GEM::particle::addChild(SimREX::GEM::particle *child) {
-    _children.push_back(child);
+    _children.emplace_back(child);
 
     if (child->getParent() != this) {
         child->setParent(this);
@@ -33,6 +33,15 @@ SimREX::GEM::particle::~particle() {
 
     clear(_children);
     clear(_states);
+}
+
+void SimREX::GEM::particle::addState(SimREX::GEM::particle_state state) {
+    _states.emplace_back(state);
+
+    if (state.particle != this) {
+        state.particle = this;
+    }
+
 }
 
 

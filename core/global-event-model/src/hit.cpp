@@ -16,7 +16,7 @@ SimREX::GEM::hit::~hit() {
 }
 
 void SimREX::GEM::hit::addParticleContribution(SimREX::GEM::particle_state *state) {
-    _particle_contributions.push_back(state);
+    _particle_contributions.emplace_back(state);
 
     if (state->hit != this) {
         state->hit = this;

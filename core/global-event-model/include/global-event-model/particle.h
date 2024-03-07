@@ -141,9 +141,7 @@ namespace SimREX::GEM {
 
         void removeChild(particle *child);
 
-        void addState(const particle_state &state) {
-            _states.push_back(state);
-        }
+        void addState(particle_state state);
 
     private:
         // Track ID (unique for each track in the event)
