@@ -18,14 +18,22 @@ auto LoggerManager = SimREX::GEM::LoggerManager::getInstance();
 auto logger = LoggerManager->createLogger("0-SimREX");
 
 struct SimArgs : public argparse::Args {
-    std::string &config_path = arg("Path to the configuration file.");
-
+    std::string &config_path = arg("config_path", "Path to the configuration file. [yaml file]");
+    unsigned &beam_on = kwarg(
+            "b,beam-on", "Number of beam-on events. [override configs]",/*implicit*/"100"
+    ).set_default(100);
+    unsigned &random_seed = kwarg(
+            "r,random-seed", "Random seed for whole simulation. [override configs]",/*implicit*/"0"
+    ).set_default(0);
 
     void welcome() override {
         std::cout << "Simulation using Geant4" << std::endl;
     }
 
     int run() override {
+        this->print();
+        logger->info("SimREX: Simulation starts.");
+
         run_simulation();
         return 0;
     }
@@ -42,7 +50,7 @@ struct Arguments : public argparse::Args {
 
     void welcome() override {
         logger->info("SimREX: {0}", SIMREX_VERSION);
-        std::cout << "SimREX: Simulation and Reconstruction" << std::endl;
+        std::cout << std::format("SimREX [{0}]: Simulation and Reconstruction", SIMREX_VERSION) << std::endl;
     }
 };
 
