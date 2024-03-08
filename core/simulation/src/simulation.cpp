@@ -6,6 +6,7 @@
 #include "simulation.h"
 #include "global-event-model/logger.h"
 #include "user-action/action_initialization.h"
+#include "detector/detector_construction.h"
 
 // Geant4 dependencies
 #include <G4RunManagerFactory.hh>
@@ -19,10 +20,8 @@ namespace SimREX::Simulation {
         //
         auto runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default);
 
-        // Set mandatory initialization classes
-        //
-        // Detector construction
-//        runManager->SetUserInitialization(new DetectorConstruction());
+
+        runManager->SetUserInitialization(new detector_construction());
 
         // Physics list
         auto physicsList = new QBBC;

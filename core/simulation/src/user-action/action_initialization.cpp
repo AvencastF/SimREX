@@ -17,8 +17,11 @@ void SimREX::Simulation::action_initialization::BuildForMaster() const {
 void SimREX::Simulation::action_initialization::Build() const {
     _logger->info("build for each workers.");
 
+    //    SetUserAction(new primary_generator_action());
+
     SetUserAction(new run_action());
     SetUserAction(new event_action());
     SetUserAction(new tracking_action());
     SetUserAction(new stepping_action());
 }
+
