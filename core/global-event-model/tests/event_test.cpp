@@ -95,7 +95,6 @@ int main() {
         }
     }
 
-
     // All tests passed
     std::cout << "All tests passed\n";
     return 0;
