@@ -34,7 +34,7 @@ struct SimArgs : public argparse::Args {
         this->print();
         logger->info("SimREX: Simulation starts.");
 
-        run_simulation();
+        SimREX::Simulation::run_simulation();
         return 0;
     }
 };

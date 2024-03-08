@@ -5,7 +5,7 @@ SimREX is the next-generation Simulation and Reconstruction Framework for the fu
 ## Software Requirements
 - CMake 3.15 or later
 - ROOT 6.30 or later
-- Geant4 11.2 or later
+- Geant4 11.2 or later (Multi-threaded by default)
 - yaml-cpp
 - spdlog
 - [nlohmann/json](https://github.com/nlohmann/json)
@@ -23,7 +23,7 @@ cmake ../root-master -Dpython3=ON -DPYTHON_EXECUTABLE=/Users/avencast/miniconda3
 
 ### Geant4.11
 ```bash
-cmake ../src -DCMAKE_INSTALL_PREFIX=/Applications/Geant4.11/install -DGEANT4_USE_GDML=ON -DGEANT4_USE_QT=ON -DCMAKE_CXX_STANDARD=20 -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_SYSTEM_EXPAT=OFF 
+cmake ../source -DCMAKE_INSTALL_PREFIX=/Applications/Geant4.11/install -DGEANT4_USE_GDML=ON -DGEANT4_USE_QT=ON -DCMAKE_CXX_STANDARD=20 -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_SYSTEM_EXPAT=OFF 
 ```
 
 ### VecGeom

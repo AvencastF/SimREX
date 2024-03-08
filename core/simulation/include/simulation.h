@@ -5,6 +5,10 @@
 #ifndef SIMREX_SIMULATION_H
 #define SIMREX_SIMULATION_H
 
-int run_simulation();
+namespace SimREX::Simulation {
+
+    int run_simulation();
+
+}
 
 #endif //SIMREX_SIMULATION_H
