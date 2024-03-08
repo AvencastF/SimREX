@@ -10,3 +10,18 @@ install(TARGETS GEM LIBRARY DESTINATION lib )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libGEM_rdict.pcm DESTINATION lib)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libGEM.rootmap DESTINATION lib)
+
+###########
+# Testing #
+###########
+# Enable testing with CTest
+enable_testing()
+
+add_executable(PhysicsDefTest tests/physics_process_def_test.cpp)
+target_link_libraries(PhysicsDefTest GEM)
+add_test(NAME PhysicsDefTest COMMAND PhysicsDefTest)
+
+
+add_executable(EventTest tests/event_test.cpp)
+target_link_libraries(EventTest PRIVATE GEM)
+add_test(NAME test_event COMMAND test_event)

@@ -5,11 +5,13 @@
 #ifndef SIMREX_LOGGER_H
 #define SIMREX_LOGGER_H
 
+// STL dependencies
 #include <memory>
 #include <string>
 #include <mutex>
 #include <shared_mutex>
 
+// spdlog dependencies
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_sinks.h"
@@ -18,9 +20,9 @@ namespace SimREX::GEM {
 
     class LoggerManager {
     public:
-        static LoggerManager &getInstance() {
+        static LoggerManager *getInstance() {
             static LoggerManager instance;
-            return instance;
+            return &instance;
         }
 
         LoggerManager(const LoggerManager &) = delete;
@@ -39,7 +41,7 @@ namespace SimREX::GEM {
                     logger = std::make_shared<spdlog::logger>(logger_name, stdout_sink);
                 }
                 spdlog::register_logger(logger);
-                logger->set_pattern("[%Y-%m-%d %H:%M:%S] [%l] %v");
+                logger->set_pattern("[%Y-%m-%d %H:%M:%S] [%n] [%l] %v");
             }
             return logger;
         }

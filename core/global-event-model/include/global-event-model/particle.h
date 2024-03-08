@@ -26,6 +26,7 @@ namespace SimREX::GEM {
     class particle;
 
     struct particle_state {
+        int process_id = -1; // unique id for this state
         double dE = 0; // energy change in this state
         hit *hit = nullptr;
         particle *particle = nullptr;
@@ -164,8 +165,7 @@ namespace SimREX::GEM {
 
         vector<particle_state> _states = {};
 
-        ClassDefOverride(particle,
-        1);
+    ClassDefOverride(particle, 1);
     };
 }
 

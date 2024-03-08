@@ -177,8 +177,7 @@ namespace SimREX::GEM {
         // each state should be pointing to the corresponding particle's _states variable
         vector<particle_state *> _particle_contributions = {};
 
-        ClassDefOverride(hit,
-        1);
+    ClassDefOverride(hit, 1);
     };
 }
 

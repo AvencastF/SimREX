@@ -25,6 +25,9 @@
 #pragma link C++ class SimREX::GEM::particle_state+;
 #pragma link C++ class std::vector<SimREX::GEM::particle_state*>+;
 
+#pragma link C++ class SimREX::GEM::event+;
+#pragma link C++ class std::vector<SimREX::GEM::event*>+;
+
 #endif
 
 
