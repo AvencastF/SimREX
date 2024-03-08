@@ -1,8 +1,9 @@
 # Copyright(c) 2024 SimREX authors Distributed under the MIT License (http://opensource.org/licenses/MIT)
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 # Setup the project
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-project(SimREX)
+project(SimREX VERSION 0.1.0)
+add_definitions("-DSIMREX_VERSION=\"${PROJECT_VERSION}\"")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -77,5 +78,6 @@ add_subdirectory(core)
 # Main Entrance #
 #################
 include_directories(${PROJECT_SOURCE_DIR}/core/simulation/include)
+include_directories(${PROJECT_SOURCE_DIR}/core/global-event-model/include)
 add_executable(SimREX SimREX.cpp)
 target_link_libraries(SimREX SimREX::GEM SimREX::Simulation)
