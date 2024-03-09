@@ -10,12 +10,14 @@
 
 // Geant4 dependencies
 #include "G4UserSteppingAction.hh"
+#include "G4Threading.hh"
 
 namespace SimREX::Simulation {
     class stepping_action : public G4UserSteppingAction {
     public:
         stepping_action() {
-            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger("stepping_action");
+            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger(
+                    std::format("Stepping Action: {}", G4Threading::G4GetThreadId()));
         }
 
         ~stepping_action() override = default;

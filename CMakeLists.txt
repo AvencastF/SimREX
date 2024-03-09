@@ -20,7 +20,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 #################
 # Add an option for building tests
 option(BUILD_TESTS "Build tests" OFF)
-
+add_compile_options("$<$<CONFIG:DEBUG>:-DDEBUG>")
 
 ###########################
 # Setup Common Packages   #

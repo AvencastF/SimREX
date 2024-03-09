@@ -5,7 +5,7 @@
 #include "user-action/stepping_action.h"
 
 void SimREX::Simulation::stepping_action::UserSteppingAction(const G4Step *step) {
-    _logger->info("stepping action: user stepping action.");
+//    _logger->info("stepping action: user stepping action.");
 
 
 }

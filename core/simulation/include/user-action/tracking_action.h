@@ -10,12 +10,14 @@
 
 // Geant4 dependencies
 #include "G4UserTrackingAction.hh"
+#include "G4Threading.hh"
 
 namespace SimREX::Simulation {
     class tracking_action : public G4UserTrackingAction {
     public:
         tracking_action() {
-            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger("tracking_action");
+            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger(
+                    std::format("Tracking Action: {}", G4Threading::G4GetThreadId()));
         }
 
         ~tracking_action() override = default;

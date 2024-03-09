@@ -10,13 +10,18 @@
 
 // Geant4 dependencies
 #include "G4UserRunAction.hh"
+#include "G4Threading.hh"
 
 namespace SimREX::Simulation {
     class run_action : public G4UserRunAction {
     public:
         run_action() {
-            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger("run_action");
+            auto logger_name =
+                    G4Threading::IsMasterThread() ?
+                    "Run Action: Master" :
+                    std::format("Run Action: {}", G4Threading::G4GetThreadId());
 
+            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger(logger_name);
         };
 
         ~run_action() override = default;

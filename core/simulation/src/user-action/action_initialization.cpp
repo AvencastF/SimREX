@@ -7,17 +7,24 @@
 #include "user-action/event_action.h"
 #include "user-action/stepping_action.h"
 #include "user-action/tracking_action.h"
+#include "user-action/primary_generator_action.h"
+
+#include "G4Threading.hh"
 
 void SimREX::Simulation::action_initialization::BuildForMaster() const {
+#ifdef DEBUG
     _logger->info("build for master: register run action.");
+#endif
 
     SetUserAction(new run_action());
 }
 
 void SimREX::Simulation::action_initialization::Build() const {
-    _logger->info("build for each workers.");
+#ifdef DEBUG
+    _logger->info("build for thread - {0}", G4Threading::G4GetThreadId());
+#endif
 
-    //    SetUserAction(new primary_generator_action());
+    SetUserAction(new primary_generator_action());
 
     SetUserAction(new run_action());
     SetUserAction(new event_action());

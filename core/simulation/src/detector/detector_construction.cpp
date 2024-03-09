@@ -5,7 +5,9 @@
 #include "detector/detector_construction.h"
 
 #include "G4Material.hh"
+#include "G4NistManager.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4Threading.hh"
 
 namespace SimREX::Simulation {
     G4ThreadLocal magnetic_field *detector_construction::_magneticField = nullptr;
@@ -28,10 +30,12 @@ namespace SimREX::Simulation {
 
         // geometries --------------------------------------------------------------
         // experimental hall (world volume)
+        G4Material *world_mat = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR");
+
         auto worldSolid
                 = new G4Box("worldBox", 10. * m, 3. * m, 10. * m);
         auto worldLogical
-                = new G4LogicalVolume(worldSolid, G4Material::GetMaterial("G4_AIR"), "worldLogical");
+                = new G4LogicalVolume(worldSolid, world_mat, "worldLogical");
         auto worldPhysical = new G4PVPlacement(
                 nullptr, G4ThreeVector(), worldLogical, "worldPhysical", nullptr, false, 0, checkOverlaps);
 
@@ -39,8 +43,9 @@ namespace SimREX::Simulation {
     }
 
     void detector_construction::ConstructSDandField() {
-        _logger->info("construct SD and field called.");
-
+#ifdef DEBUG
+        _logger->info("Thread - {}: construct SD and field called.", G4Threading::G4GetThreadId());
+#endif
         // magnetic field ----------------------------------------------------------
         _magneticField = new magnetic_field();
         _fieldMgr = new G4FieldManager();

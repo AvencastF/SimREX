@@ -4,10 +4,19 @@
 
 #include "user-action/event_action.h"
 
-void SimREX::Simulation::event_action::BeginOfEventAction(const G4Event *) {
-    _logger->info("Begin of event action.");
+#include "G4Threading.hh"
+#include "G4Event.hh"
+
+void SimREX::Simulation::event_action::BeginOfEventAction(const G4Event *evt) {
+#ifdef DEBUG
+    _logger->info("Begin of event {}.",  evt->GetEventID());
+#else
+    _logger->info("Running event {}.",  evt->GetEventID());
+#endif
 }
 
-void SimREX::Simulation::event_action::EndOfEventAction(const G4Event *) {
-    _logger->info("End of event action.");
+void SimREX::Simulation::event_action::EndOfEventAction(const G4Event *evt) {
+#ifdef DEBUG
+    _logger->info("End of event {}.",  evt->GetEventID());
+#endif
 }

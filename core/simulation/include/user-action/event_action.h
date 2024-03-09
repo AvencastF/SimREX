@@ -10,20 +10,21 @@
 
 // Geant4 dependencies
 #include "G4UserEventAction.hh"
+#include "G4Threading.hh"
 
 
 namespace SimREX::Simulation {
     class event_action : public G4UserEventAction {
     public:
         event_action() {
-            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger("event_action");
+            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger(std::format("Event Action: {}", G4Threading::G4GetThreadId()));
         }
 
         ~event_action() override = default;
 
-        void BeginOfEventAction(const G4Event *) override;
+        void BeginOfEventAction(const G4Event *evt) override;
 
-        void EndOfEventAction(const G4Event *) override;
+        void EndOfEventAction(const G4Event *evt) override;
 
     private:
         std::shared_ptr<spdlog::logger> _logger;
