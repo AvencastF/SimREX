@@ -40,22 +40,32 @@ namespace SimREX::Simulation {
         assign<int>(_node, "beam_on", _data["beam_on"], 0);
 
         // Verbosity
+        // Attention: applying verbosity will be set in the action initialization for master thread.
         auto node_name = "verbosity";
         if (auto sub_node = _node[node_name]; sub_node.IsDefined()) {
             assign<int>(sub_node, "run", _data["verbosity/run"], 2);
             assign<int>(sub_node, "event", _data["verbosity/event"], 0);
             assign<int>(sub_node, "tracking", _data["verbosity/tracking"], 0);
+            assign<int>(sub_node, "stepping", _data["verbosity/stepping"], 0);
         } else {
             _logger->warn("Verbosity not defined, using default values");
             _data["verbosity/run"] = 2;
             _data["verbosity/event"] = 0;
             _data["verbosity/tracking"] = 0;
+            _data["verbosity/stepping"] = 0;
         }
 
         /*
          * Step 3: Reading General Particle Source
+         *
+         * Attention: this part should be set in the main program, not here.
          */
-//        readAndSetGPS();
+
+
+        /*
+         * Step 4: Reading Detector Configs
+         *
+         */
 
 
         return true;
@@ -157,18 +167,18 @@ namespace SimREX::Simulation {
     void control::readAndSetGPS() {
         auto node_name = "general_particle_source";
         auto UIManager = G4UImanager::GetUIpointer();
+
+        std::string gps_str;
         if (auto gps_node = _node[node_name]; gps_node.IsDefined()) {
             for (auto cmd: gps_node) {
-                printf(
-                        "GPS settings: /gps/%s %s \n", cmd.first.as<std::string>().data(),
-                        cmd.second.as<std::string>().data()
-                );
+                gps_str += std::format("\t/gps/{0} {1}\n", cmd.first.as<std::string>(), cmd.second.as<std::string>());
                 UIManager->ApplyCommand("/gps/" + cmd.first.as<std::string>() + " " +
                                         cmd.second.as<std::string>());
             }
+            _logger->info("General Particle Source: \n{0}", gps_str);
         }
-    }
 
+    }
 
     void control::printData() {
         std::string detail;

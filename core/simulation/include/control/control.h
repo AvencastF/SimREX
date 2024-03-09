@@ -82,6 +82,10 @@ namespace SimREX::Simulation {
             if (node[name].IsDefined()) {
                 variable = node[name].as<T>();
             } else {
+                if (required) {
+                    _logger->error("Node {0} not found in YAML file, exiting", name);
+                    exit(EXIT_FAILURE);
+                }
                 variable = default_value;
                 _logger->error("Node {0} not found in YAML file, using default: {1}", name, default_value);
             }

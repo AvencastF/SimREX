@@ -62,11 +62,10 @@ namespace SimREX::Simulation {
         // User action initialization
         runManager->SetUserInitialization(new action_initialization());
 
-
         // Initialize G4 kernel
         runManager->Initialize();
 
-        // Read and set GPS
+        // Read and set GPS (set after primary generator action is initialized)
         control::Instance()->readAndSetGPS();
 
         runManager->BeamOn(beam_on);
