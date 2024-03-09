@@ -15,7 +15,7 @@ namespace SimREX::Simulation {
     class action_initialization : public G4VUserActionInitialization {
     public:
         action_initialization() {
-            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger("action_initialization");
+            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger("Action Initialization");
         }
 
         ~action_initialization() override = default;

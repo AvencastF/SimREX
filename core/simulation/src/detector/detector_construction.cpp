@@ -15,7 +15,7 @@ namespace SimREX::Simulation {
 
 
     detector_construction::detector_construction() {
-        _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger("detector_construction");
+        _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger("Detector Construction");
         _logger->info("constructor called.");
     }
 
@@ -44,7 +44,7 @@ namespace SimREX::Simulation {
 
     void detector_construction::ConstructSDandField() {
 #ifdef DEBUG
-        _logger->info("Thread - {}: construct SD and field called.", G4Threading::G4GetThreadId());
+        _logger->info("construct SD and field called.");
 #endif
         // magnetic field ----------------------------------------------------------
         _magneticField = new magnetic_field();

@@ -34,3 +34,4 @@ cmake ../src.VecGeom -DCMAKE_INSTALL_PREFIX=/Applications/VecGeom/install -DVECG
 # G4VecGeomNav
 cmake ../src.G4VecGeomNav -DCMAKE_INSTALL_PREFIX=/Applications/VecGeom/install -DCMAKE_CXX_STANDARD=20 -DCMAKE_PREFIX_PATH=/Applications/VecGeom/install/lib/cmake
 ```
+
