@@ -18,13 +18,13 @@ SimREX::Simulation::primary_generator_action::primary_generator_action() {
     _particleSource = new G4GeneralParticleSource();
 
     // temporary default settings
-    _particleSource->SetParticleDefinition(G4ParticleTable::GetParticleTable()->FindParticle("e-"));
-    _particleSource->SetParticlePosition(G4ThreeVector(0., 0., 0.));
-    _particleSource->SetCurrentSourceIntensity(1.0);
-
-    _particleSource->GetCurrentSource()->SetNumberOfParticles(1);
-    _particleSource->GetCurrentSource()->SetParticleTime(0.0);
-    _particleSource->GetCurrentSource()->GetEneDist()->SetMonoEnergy(1.0 * GeV);
+//    _particleSource->SetParticleDefinition(G4ParticleTable::GetParticleTable()->FindParticle("e-"));
+//    _particleSource->SetParticlePosition(G4ThreeVector(0., 0., 0.));
+//    _particleSource->SetCurrentSourceIntensity(1.0);
+//
+//    _particleSource->GetCurrentSource()->SetNumberOfParticles(1);
+//    _particleSource->GetCurrentSource()->SetParticleTime(0.0);
+//    _particleSource->GetCurrentSource()->GetEneDist()->SetMonoEnergy(100.0 * MeV);
 }
 
 SimREX::Simulation::primary_generator_action::~primary_generator_action() {
@@ -48,11 +48,15 @@ void SimREX::Simulation::primary_generator_action::GeneratePrimaries(G4Event *an
     // Loop over all primary vertices
     while (primaryVertex) {
         // Get the position of the vertex
-        G4ThreeVector position = primaryVertex->GetPosition();
+        auto position = primaryVertex->GetPosition();
+        auto momentum = primaryVertex->GetPrimary()->GetMomentum();
         // Log the vertex position
-        _logger->info(
-                "Event {0} - Vertex position: {1}, {2}, {3}",
-                anEvent->GetEventID(), position.x(), position.y(), position.z()
+        _logger->info( "Event {0}: Primary vertex:"
+                "\n\t - Vertex position: {1}, {2}, {3}"
+                "\n\t - Vertex momentum: {4}, {5}, {6}",
+                anEvent->GetEventID(),
+                position.x(), position.y(), position.z(),
+                momentum.x(), momentum.y(), momentum.z()
         );
         // Move to the next vertex
         primaryVertex = primaryVertex->GetNext();

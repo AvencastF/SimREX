@@ -21,10 +21,19 @@ namespace SimREX::Simulation {
         auto _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger("simulation");
 
         // Initialize the control
-        control::getInstance();
+        control::Instance()->readYAML(_config_path);
 
-        int random_seed = _random_seed;
-        G4int beam_on = _beam_on;
+        // Overwrite config with command line arguments
+        if (_beam_on >= 0) {
+            control::Instance()->setData("beam_on", _beam_on);
+        }
+        if (_random_seed >= 0) {
+            control::Instance()->setData("random_seed", _random_seed);
+        }
+        control::Instance()->printData();
+
+        auto random_seed = control::Instance()->getValue<int>("random_seed");
+        auto beam_on = control::Instance()->getValue<int>("beam_on");
 
         // Set random seed for the main program (MT - not for workers)
         G4Random::setTheEngine(new CLHEP::RanecuEngine);
@@ -53,8 +62,12 @@ namespace SimREX::Simulation {
         // User action initialization
         runManager->SetUserInitialization(new action_initialization());
 
+
         // Initialize G4 kernel
         runManager->Initialize();
+
+        // Read and set GPS
+        control::Instance()->readAndSetGPS();
 
         runManager->BeamOn(beam_on);
 
