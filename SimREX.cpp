@@ -17,7 +17,7 @@
 auto LoggerManager = SimREX::GEM::LoggerManager::getInstance();
 auto logger = LoggerManager->createLogger("SimREX");
 
-struct SimArgs : public argparse::Args {
+struct SimArgs final : argparse::Args {
     std::string& config_path = arg("config_path", "Path to the configuration file. [yaml file]");
     int& beam_on = kwarg(
         "b,beam-on", "Number of beam-on events. [override configs]",/*implicit*/"100"
@@ -28,6 +28,12 @@ struct SimArgs : public argparse::Args {
     int& threads = kwarg(
         "t,threads", "Number of threads to use. [override configs, 0 to use all available cores]"
     ).set_default(-1);
+    std::string& log_file = kwarg(
+        "l,log-file", "Path to the log file. [optional, not working now]"
+    ).set_default("");
+    int& run_number = kwarg(
+        "n,run-number", "Run number. [optional]"
+    ).set_default(0);
 
     void welcome() override {
         std::cout << "Simulation using Geant4" << std::endl;
@@ -37,14 +43,16 @@ struct SimArgs : public argparse::Args {
         this->print();
         logger->info("SimREX: Simulation starts.");
 
-        SimREX::Simulation::run_simulation(this->config_path, this->beam_on, this->random_seed, this->threads);
+        SimREX::Simulation::run_simulation(
+            this->config_path, this->beam_on, this->random_seed, this->threads, this->log_file, this->run_number
+        );
         return 0;
     }
 };
 
-struct RecArgs : public argparse::Args {};
+struct RecArgs final : argparse::Args {};
 
-struct Arguments : public argparse::Args {
+struct Arguments final : argparse::Args {
     SimArgs& sim = subcommand("simulation");
     RecArgs& rec = subcommand("reconstruction");
 

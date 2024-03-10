@@ -13,21 +13,17 @@ namespace SimREX::Simulation {
 
         // Only the worker thread needs to create a data manager
         if (!G4Threading::IsMasterThread()) {
-            _data_manager = new data_manager(
-                db::Instance()->get<std::string>("data_manager/output_file_name"),
-                db::Instance()->get<std::string>("data_manager/output_tree_name"),
-                G4Threading::G4GetThreadId()
-            );
-            _data_manager->initialize();
-            _data_manager->book();
+            std::cout<<"Creating data manager for thread "<<G4Threading::G4GetThreadId()<<std::endl;
+            db::Instance()->registerDataManagers(G4Threading::G4GetThreadId());
+            db::Instance()->getDataManager(G4Threading::G4GetThreadId())->book();
         }
     }
 
     void run_action::EndOfRunAction(const G4Run*) {
-        _logger->info("End of run action.");
-
         if (!G4Threading::IsMasterThread()) {
-            delete _data_manager;
+            db::Instance()->getDataManager(G4Threading::G4GetThreadId())->save();
         }
+
+        _logger->info("End of run action.");
     }
 }

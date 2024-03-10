@@ -30,10 +30,30 @@ namespace SimREX::Simulation {
         //! Initialize the event data in data manager
         void initialize();
 
+        //! Set the run number, event number, and the random seed (rndm in GEM::event)
+        void setEventInfo(int run_number, int event_number, const std::array<int, 4>& random_number);
+
         //! Book the output file and tree in ROOT at the beginning of each worker thread (RunAction)
         void book();
 
-        //!
+        //! Fill the MC particles in global-data-model event
+        void fillParticles();
+
+        //! Fill the entry in the output tree (initialized automatically after fill)
+        void fill();
+
+        //! Save the output file and tree in ROOT at the end of each worker thread (RunAction)
+        void save();
+
+
+        std::vector<GEM::particle*>* getParticles() {
+            return _event->getMCParticles();
+        }
+
+        GEM::event* getEvent() {
+            return _event;
+        }
+
 
     private:
         std::shared_ptr<spdlog::logger> _logger;

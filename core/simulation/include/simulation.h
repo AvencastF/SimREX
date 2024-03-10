@@ -8,8 +8,8 @@
 #include <string>
 
 namespace SimREX::Simulation {
-
-    int run_simulation(const std::string& _config_path, int _beam_on, int _random_seed, int _threads);
+    void run_simulation(const std::string& _config_path, int _beam_on, int _random_seed, int _threads,
+                        const std::string& _log_file, int _run_number);
 
 }
 

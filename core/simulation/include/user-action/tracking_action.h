@@ -7,16 +7,18 @@
 
 // core dependencies
 #include "global-event-model/logger.h"
+#include "global-event-model/particle.h"
+#include "control/database.h"
 
 // Geant4 dependencies
-#include "G4UserTrackingAction.hh"
-#include "G4Threading.hh"
+#include <G4UserTrackingAction.hh>
+#include <G4Threading.hh>
 
 namespace SimREX::Simulation {
-    class tracking_action : public G4UserTrackingAction {
+    class tracking_action final : public G4UserTrackingAction {
     public:
         tracking_action() {
-            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger(
+            _logger = GEM::LoggerManager::getInstance()->createLogger(
                     std::format("Tracking Action: {}", G4Threading::G4GetThreadId()));
         }
 
@@ -28,6 +30,7 @@ namespace SimREX::Simulation {
 
     private:
         std::shared_ptr<spdlog::logger> _logger;
+
     };
 }
 

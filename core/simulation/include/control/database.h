@@ -7,6 +7,8 @@
 
 // core dependencies
 #include "global-event-model/logger.h"
+#include "global-event-model/physics_process_def.h"
+#include "control/data_manager.h"
 
 // yaml-cpp
 #include <yaml-cpp/yaml.h>
@@ -27,6 +29,8 @@
 namespace SimREX::Simulation {
     using VarType = std::variant<bool, int, double, std::string>;
 
+    class data_manager;
+
     class db {
     public:
         // Provide global access to the single instance of ControlClass.
@@ -35,12 +39,16 @@ namespace SimREX::Simulation {
             return &instance;
         }
 
+        ~db();
+
         // Delete copy constructor and assignment operator to prevent multiple instances.
         db(const db&) = delete;
 
         db& operator=(const db&) = delete;
 
         bool readYAML(const std::string& file_in);
+
+        void postReadYAML();
 
         void readAndSetGPS();
 
@@ -69,6 +77,13 @@ namespace SimREX::Simulation {
         }
 
         void processNode(const YAML::Node& node, const std::string& name, const std::map<std::string, VarType>& data);
+
+        void registerDataManagers(int thread_id);
+        data_manager* getDataManager(int thread_id);
+
+        std::unordered_map<string, int>& getProcessMap() {
+            return _process_map;
+        }
 
     private:
         // Private constructor to prevent instantiation outside getInstance().
@@ -101,6 +116,13 @@ namespace SimREX::Simulation {
         std::shared_ptr<spdlog::logger> _logger;
 
         std::unordered_map<std::string, VarType> _data;
+
+        // a map of data managers, indexed by thread id
+        std::unordered_map<int, data_manager*> _data_managers;
+        std::mutex _data_managers_mutex;
+
+        // a map of physics process
+        std::unordered_map<string, int> _process_map;
     };
 }
 #endif //SIMREX_CONTROL_H

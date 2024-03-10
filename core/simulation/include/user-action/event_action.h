@@ -17,14 +17,15 @@ namespace SimREX::Simulation {
     class event_action final : public G4UserEventAction {
     public:
         event_action() {
-            _logger = GEM::LoggerManager::getInstance()->createLogger(std::format("Event Action: {}", G4Threading::G4GetThreadId()));
+            _logger = GEM::LoggerManager::getInstance()->createLogger(
+                std::format("Event Action: {}", G4Threading::G4GetThreadId()));
         }
 
         ~event_action() override = default;
 
-        void BeginOfEventAction(const G4Event *evt) override;
+        void BeginOfEventAction(const G4Event* evt) override;
 
-        void EndOfEventAction(const G4Event *evt) override;
+        void EndOfEventAction(const G4Event* evt) override;
 
     private:
         std::shared_ptr<spdlog::logger> _logger;

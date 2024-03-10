@@ -23,15 +23,21 @@ namespace SimREX::Simulation {
     }
 
     data_manager::~data_manager() {
-        _output_file->Close();
-
         delete _output_file;
-
         delete _event;
     }
 
     void data_manager::initialize() {
         _event->initialize();
+    }
+
+    void data_manager::setEventInfo(int run_number, int event_number, const std::array<int, 4>& random_number) {
+        _run_number = run_number;
+        _event_number = event_number;
+
+        _event->setRunNumber(_run_number);
+        _event->setEventNumber(_event_number);
+        _event->setRandomNumber(random_number);
     }
 
     void data_manager::book() {
@@ -46,6 +52,24 @@ namespace SimREX::Simulation {
 
         _output_tree->Branch("run_number", &_run_number, "run_number/I");
         _output_tree->Branch("event_number", &_event_number, "event_number/I");
-        _output_tree->Branch("event", "GEM::event", &_event, 320000000);
+        _output_tree->Branch("event", "SimREX::GEM::event", &_event, 320000000);
+    }
+
+    void data_manager::fillParticles() {}
+
+    void data_manager::fill() {
+        if (_output_file && _output_tree) {
+            _output_tree->Fill();
+
+            _logger->info("Event: {} filled", _event_number);
+        }
+    }
+
+    void data_manager::save() {
+        _output_file->cd();
+        _output_tree->Write("", TObject::kOverwrite);
+        _output_file->Close();
+
+        _logger->info("Output file: {} saved", _output_file_name);
     }
 }

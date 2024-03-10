@@ -3,20 +3,53 @@
 //
 
 #include "user-action/event_action.h"
+#include "control/database.h"
 
-#include "G4Threading.hh"
-#include "G4Event.hh"
+// Geant4 dependencies
+#include <G4Threading.hh>
+#include <G4Event.hh>
+#include <G4RunManager.hh>
 
-void SimREX::Simulation::event_action::BeginOfEventAction(const G4Event *evt) {
+namespace SimREX::Simulation {
+    std::array<int, 4> retrieveNumbers(const std::string& str) {
+        std::istringstream iss(str);
+        std::string line;
+        std::array<int, 4> numbers{};
+
+        // Skip the first two lines
+        std::getline(iss, line);
+        std::getline(iss, line);
+
+        // Read the next four lines and convert them to integers
+        for (int i = 0; i < 4; ++i) {
+            std::getline(iss, line);
+            numbers.at(i) = std::stoi(line);
+        }
+
+        return numbers;
+    }
+
+    void event_action::BeginOfEventAction(const G4Event* evt) {
 #ifdef DEBUG
-    _logger->info("Begin of event {}.",  evt->GetEventID());
+        _logger->info("Begin of event {}.", evt->GetEventID());
 #else
     _logger->info("Running event {}.",  evt->GetEventID());
 #endif
-}
 
-void SimREX::Simulation::event_action::EndOfEventAction(const G4Event *evt) {
+        G4RunManager::GetRunManager()->StoreRandomNumberStatusToG4Event(1);
+    }
+
+    void event_action::EndOfEventAction(const G4Event* evt) {
+        // Record random seed numbers
+        const G4String& random_numbers_str = G4RunManager::GetRunManager()->GetRandomNumberStatusForThisEvent();
+        const auto random_numbers = retrieveNumbers(random_numbers_str);
+
+        auto data_manager = db::Instance()->getDataManager(G4Threading::G4GetThreadId());
+        data_manager->setEventInfo(db::Instance()->get<int>("run_number"), evt->GetEventID(), random_numbers);
+        data_manager->fill();
+
 #ifdef DEBUG
-    _logger->info("End of event {}.",  evt->GetEventID());
+        _logger->info("End of event {}.", evt->GetEventID());
 #endif
+    }
 }

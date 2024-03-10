@@ -16,7 +16,7 @@ namespace SimREX::Simulation {
     class stepping_action : public G4UserSteppingAction {
     public:
         stepping_action() {
-            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger(
+            _logger = GEM::LoggerManager::getInstance()->createLogger(
                     std::format("Stepping Action: {}", G4Threading::G4GetThreadId()));
         }
 

@@ -9,6 +9,14 @@
 namespace SimREX::Simulation {
     db::db() {
         _logger = GEM::LoggerManager::getInstance()->createLogger("control");
+
+        _process_map = GEM::PhysicsDef().dPhyTypeMap;
+    }
+
+    db::~db() {
+        for (auto& [key, value] : _data_managers) {
+            delete value;
+        }
     }
 
     bool db::readYAML(const std::string& file_in) {
@@ -70,6 +78,8 @@ namespace SimREX::Simulation {
         return true;
     }
 
+    void db::postReadYAML() {}
+
     void db::processNode(const YAML::Node& node, const std::string& name, const std::map<std::string, VarType>& data) {
         bool once = false;
         for (const auto& [key, value] : data) {
@@ -85,11 +95,30 @@ namespace SimREX::Simulation {
                     once = true;
                 }
 
-                std::visit([key, name, &sub_node, this](auto&& arg) {
+                std::visit([key, name, this](auto&& arg) {
                     _data[std::format("{0}/{1}", name, key)] = arg;
                 }, value);
             }
         }
+    }
+
+    void db::registerDataManagers(int thread_id) {
+        std::lock_guard<std::mutex> lock(_data_managers_mutex);
+        _data_managers[thread_id] = new data_manager(
+            std::get<std::string>(_data["data_manager/output_file_name"]),
+            std::get<std::string>(_data["data_manager/output_tree_name"]),
+            thread_id
+        );
+
+        _logger->info("Data Manager for thread {} registered", thread_id);
+    }
+
+    data_manager* db::getDataManager(int thread_id) {
+        if (auto it = _data_managers.find(thread_id); it != _data_managers.end()) {
+            return it->second;
+        }
+        _logger->error("Data Manager for thread {} not found", thread_id);
+        exit(EXIT_FAILURE);
     }
 
 

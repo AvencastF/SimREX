@@ -19,8 +19,20 @@
 #include <Randomize.hh>
 
 namespace SimREX::Simulation {
-    int run_simulation(const std::string& _config_path, int _beam_on, int _random_seed, int _threads) {
-        auto _logger = GEM::LoggerManager::getInstance()->createLogger("simulation");
+    void run_simulation(
+        const std::string& _config_path,
+        int _beam_on,
+        int _random_seed,
+        int _threads,
+        const std::string& _log_file,
+        int _run_number
+    ) {
+        if (!_log_file.empty()) {
+            GEM::LoggerManager::getInstance()->setLogToFile(true);
+            GEM::LoggerManager::getInstance()->setLogFileName(_log_file);
+        }
+
+        const auto _logger = GEM::LoggerManager::getInstance()->createLogger("simulation");
 
         // Initialize ROOT environment
         gROOT->Reset();
@@ -39,10 +51,12 @@ namespace SimREX::Simulation {
         if (_threads >= 0) {
             db::Instance()->set("threads", _threads);
         }
+        db::Instance()->set("log_file", _log_file);
+        db::Instance()->set("run_number", _run_number);
         db::Instance()->printData();
 
-        auto random_seed = db::Instance()->get<int>("random_seed");
-        auto beam_on = db::Instance()->get<int>("beam_on");
+        const auto random_seed = db::Instance()->get<int>("random_seed");
+        const auto beam_on = db::Instance()->get<int>("beam_on");
 
         // Set random seed for the main program (MT - not for workers)
         G4Random::setTheEngine(new CLHEP::RanecuEngine);
@@ -58,6 +72,7 @@ namespace SimREX::Simulation {
         const auto threads = db::Instance()->get<int>("threads");
         auto nThreads = threads == 0 ? totalThreads : threads;
         runManager->SetNumberOfThreads(nThreads);
+        db::Instance()->set("threads", nThreads);
         _logger->warn("Using {0}/{1} threads.", nThreads, totalThreads);
 #endif
 
@@ -85,7 +100,5 @@ namespace SimREX::Simulation {
         * in the main() program !
         */
         delete runManager;
-
-        return 1;
     }
 }

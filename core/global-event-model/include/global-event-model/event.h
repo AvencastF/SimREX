@@ -45,11 +45,11 @@ namespace SimREX::GEM {
             _event_number = eventNumber;
         }
 
-        [[nodiscard]] const array<double, 4> &getRandomNumber() const {
+        [[nodiscard]] const array<int, 4> &getRandomNumber() const {
             return _random_number;
         }
 
-        void setRandomNumber(const array<double, 4> &randomNumber) {
+        void setRandomNumber(const array<int, 4> &randomNumber) {
             _random_number = randomNumber;
         }
 
@@ -97,7 +97,7 @@ namespace SimREX::GEM {
         unsigned _run_number = 0;
         unsigned _event_number = 0;
         // random number seed for this event (used for reproducibility in Geant4)
-        array<double, 4> _random_number = {0, 0, 0, 0};
+        array<int, 4> _random_number = {0, 0, 0, 0};
 
         // Used for event biasing
         double _event_weight = 1.0;

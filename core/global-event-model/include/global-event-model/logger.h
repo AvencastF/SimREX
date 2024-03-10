@@ -12,9 +12,9 @@
 #include <shared_mutex>
 
 // spdlog dependencies
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/basic_file_sink.h"
-#include "spdlog/sinks/stdout_sinks.h"
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_sinks.h>
 
 namespace SimREX::GEM {
 
@@ -34,7 +34,7 @@ namespace SimREX::GEM {
             auto logger = spdlog::get(logger_name);
             if (!logger) {
                 if (_logToFile) {
-                    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(_logFileName, true);
+                    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(_logFileName, false);
                     logger = std::make_shared<spdlog::logger>(logger_name, file_sink);
                 } else {
                     auto stdout_sink = std::make_shared<spdlog::sinks::stdout_sink_mt>();

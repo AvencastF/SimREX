@@ -20,7 +20,7 @@ namespace SimREX::GEM {
 
     class particle;
 
-    class particle_state;
+    struct particle_state;
 
     enum class stage : uint16_t {
         none,
