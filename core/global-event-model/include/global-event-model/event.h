@@ -11,8 +11,8 @@
 #include <array>
 
 // ROOT dependencies
-#include "TObject.h"
-#include "TString.h"
+#include <TObject.h>
+#include <TString.h>
 
 // Global-Event-Model dependencies
 #include "global-event-model/hit.h"
@@ -77,7 +77,7 @@ namespace SimREX::GEM {
             _mc_particles = mcParticles;
         }
 
-        void initialization();
+        void initialize();
 
         void registerHitCollection(const TString &col_name);
 

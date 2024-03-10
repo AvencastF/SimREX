@@ -9,7 +9,7 @@
 #include "global-event-model/logger.h"
 
 // yaml-cpp
-#include "yaml-cpp/yaml.h"
+#include <yaml-cpp/yaml.h>
 
 // STL dependencies
 #include <string>
@@ -19,45 +19,47 @@
 #include <map>
 
 // Geant4 dependencies
-#include "G4Material.hh"
-#include "G4UnitsTable.hh"
-#include "G4NistManager.hh"
-#include "G4UImanager.hh"
+#include <G4Material.hh>
+#include <G4UnitsTable.hh>
+#include <G4NistManager.hh>
+#include <G4UImanager.hh>
 
 namespace SimREX::Simulation {
-
     using VarType = std::variant<bool, int, double, std::string>;
 
-    class control {
+    class db {
     public:
         // Provide global access to the single instance of ControlClass.
-        static control *Instance() {
-            static control instance;  // Guaranteed to be destroyed and instantiated on first use.
+        static db* Instance() {
+            static db instance; // Guaranteed to be destroyed and instantiated on first use.
             return &instance;
         }
 
         // Delete copy constructor and assignment operator to prevent multiple instances.
-        control(const control &) = delete;
+        db(const db&) = delete;
 
-        control &operator=(const control &) = delete;
+        db& operator=(const db&) = delete;
 
-        bool readYAML(const std::string &file_in);
+        bool readYAML(const std::string& file_in);
 
         void readAndSetGPS();
 
         void printData();
 
-        void setData(const std::string &name, VarType value) {
+        //! set variable to the core data
+        void set(const std::string& name, VarType value) {
             _data[name] = std::move(value);
         }
 
-        template<typename T>
-        T getValue(const std::string &key) {
-            auto it = _data.find(key);
+        //! get variable from the core data, the data type should be specified
+        template <typename T>
+        T get(const std::string& key) {
+            const auto& it = _data.find(key);
             if (it != _data.end()) {
                 if (auto val = std::get_if<T>(&it->second)) {
                     return *val; // Return the value directly if found and type matches
-                } else {
+                }
+                else {
                     _logger->error("Type mismatch for key: {0}", key);
                     exit(EXIT_FAILURE);
                 }
@@ -66,22 +68,25 @@ namespace SimREX::Simulation {
             exit(EXIT_FAILURE);
         }
 
+        void processNode(const YAML::Node& node, const std::string& name, const std::map<std::string, VarType>& data);
+
     private:
         // Private constructor to prevent instantiation outside getInstance().
-        control();
+        db();
 
-        void buildMaterialTable(const std::string &mat_file);
+        void buildMaterialTable(const std::string& mat_file);
 
-        template<typename T>
-        void assign(const YAML::Node &node,
-                    const std::string &name,
-                    VarType &variable,
+        template <typename T>
+        void assign(const YAML::Node& node,
+                    const std::string& name,
+                    VarType& variable,
                     T default_value,
                     bool required = false
         ) {
             if (node[name].IsDefined()) {
                 variable = node[name].as<T>();
-            } else {
+            }
+            else {
                 if (required) {
                     _logger->error("Node {0} not found in YAML file, exiting", name);
                     exit(EXIT_FAILURE);
@@ -97,6 +102,5 @@ namespace SimREX::Simulation {
 
         std::unordered_map<std::string, VarType> _data;
     };
-
 }
 #endif //SIMREX_CONTROL_H

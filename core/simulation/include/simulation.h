@@ -9,7 +9,7 @@
 
 namespace SimREX::Simulation {
 
-    int run_simulation(const std::string& _config_path, int _beam_on, int _random_seed);
+    int run_simulation(const std::string& _config_path, int _beam_on, int _random_seed, int _threads);
 
 }
 

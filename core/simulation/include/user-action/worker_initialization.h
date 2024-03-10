@@ -9,12 +9,12 @@
 #include "global-event-model/logger.h"
 
 // Geant4 dependencies
-#include "G4UserWorkerInitialization.hh"
-#include "Randomize.hh"
-#include "G4Threading.hh"
+#include <G4UserWorkerInitialization.hh>
+#include <Randomize.hh>
+#include <G4Threading.hh>
 
 namespace SimREX::Simulation {
-    class worker_initialization : public G4UserWorkerInitialization {
+    class worker_initialization final : public G4UserWorkerInitialization {
     public:
         explicit worker_initialization(G4long base_seed);
 

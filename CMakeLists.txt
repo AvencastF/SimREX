@@ -81,3 +81,29 @@ include_directories(${PROJECT_SOURCE_DIR}/core/simulation/include)
 include_directories(${PROJECT_SOURCE_DIR}/core/global-event-model/include)
 add_executable(SimREX SimREX.cpp)
 target_link_libraries(SimREX SimREX::GEM SimREX::Simulation)
+
+
+
+#########################
+# Doxygen Documentation #
+#########################
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    # Specify the input and output Doxyfile
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in)
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+    set(DOXYGEN_PROJECT_NUMBER ${PROJECT_VERSION})
+    set(DOXYGEN_PROJECT_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/core)
+
+    # Replace variables inside your Doxyfile.in
+    configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+
+    add_custom_target(doc ALL
+            COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generating API documentation with Doxygen"
+            VERBATIM)
+else()
+    message(STATUS "Doxygen not found, unable to generate documentation")
+endif()

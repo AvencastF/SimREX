@@ -9,8 +9,9 @@
 #include "global-event-model/logger.h"
 
 // Geant4 dependencies
-#include "G4VUserPrimaryGeneratorAction.hh"
-#include "G4GeneralParticleSource.hh"
+#include <G4VUserPrimaryGeneratorAction.hh>
+#include <G4GeneralParticleSource.hh>
+#include <G4Event.hh>
 
 namespace SimREX::Simulation {
     class primary_generator_action : public G4VUserPrimaryGeneratorAction {
@@ -19,12 +20,12 @@ namespace SimREX::Simulation {
 
         ~primary_generator_action() override;
 
-        void GeneratePrimaries(G4Event *anEvent) override;
+        void GeneratePrimaries(G4Event* anEvent) override;
 
     private:
         std::shared_ptr<spdlog::logger> _logger;
 
-        G4GeneralParticleSource *_particleSource;
+        G4GeneralParticleSource* _particleSource;
     };
 }
 

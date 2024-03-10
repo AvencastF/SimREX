@@ -4,12 +4,13 @@
 
 #include "user-action/worker_initialization.h"
 
+
 namespace SimREX::Simulation {
 
     void worker_initialization::WorkerInitialize() const {
 
-        G4int threadID = G4Threading::G4GetThreadId();
-        G4long unique_seed = _base_seed + threadID;
+        const G4int threadID = G4Threading::G4GetThreadId();
+        const G4long unique_seed = _base_seed + threadID;
 
         G4Random::setTheEngine(new CLHEP::RanecuEngine);
         G4Random::setTheSeed(unique_seed);

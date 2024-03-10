@@ -18,12 +18,15 @@ auto LoggerManager = SimREX::GEM::LoggerManager::getInstance();
 auto logger = LoggerManager->createLogger("SimREX");
 
 struct SimArgs : public argparse::Args {
-    std::string &config_path = arg("config_path", "Path to the configuration file. [yaml file]");
-    int &beam_on = kwarg(
-            "b,beam-on", "Number of beam-on events. [override configs]",/*implicit*/"100"
+    std::string& config_path = arg("config_path", "Path to the configuration file. [yaml file]");
+    int& beam_on = kwarg(
+        "b,beam-on", "Number of beam-on events. [override configs]",/*implicit*/"100"
     ).set_default(-1);
-    int &random_seed = kwarg(
-            "r,random-seed", "Random seed for whole simulation. [override configs]"
+    int& random_seed = kwarg(
+        "r,random-seed", "Random seed for whole simulation. [override configs]"
+    ).set_default(-1);
+    int& threads = kwarg(
+        "t,threads", "Number of threads to use. [override configs, 0 to use all available cores]"
     ).set_default(-1);
 
     void welcome() override {
@@ -34,19 +37,18 @@ struct SimArgs : public argparse::Args {
         this->print();
         logger->info("SimREX: Simulation starts.");
 
-        SimREX::Simulation::run_simulation(this->config_path, this->beam_on, this->random_seed);
+        SimREX::Simulation::run_simulation(this->config_path, this->beam_on, this->random_seed, this->threads);
         return 0;
     }
 };
 
-struct RecArgs : public argparse::Args {
-};
+struct RecArgs : public argparse::Args {};
 
 struct Arguments : public argparse::Args {
-    SimArgs &sim = subcommand("simulation");
-    RecArgs &rec = subcommand("reconstruction");
+    SimArgs& sim = subcommand("simulation");
+    RecArgs& rec = subcommand("reconstruction");
 
-    bool &version = flag("v,version", "Print version");
+    bool& version = flag("v,version", "Print version");
 
     void welcome() override {
         logger->info("SimREX: {0}", SIMREX_VERSION);
@@ -54,9 +56,7 @@ struct Arguments : public argparse::Args {
     }
 };
 
-int main(int argc, char *argv[]) {
-
-
+int main(int argc, char* argv[]) {
     auto args = argparse::parse<Arguments>(argc, argv);
 
     if (args.version) {

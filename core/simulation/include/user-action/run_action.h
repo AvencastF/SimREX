@@ -7,31 +7,34 @@
 
 // core dependencies
 #include "global-event-model/logger.h"
+#include "control/data_manager.h"
 
 // Geant4 dependencies
-#include "G4UserRunAction.hh"
-#include "G4Threading.hh"
+#include <G4UserRunAction.hh>
+#include <G4Threading.hh>
 
 namespace SimREX::Simulation {
     class run_action : public G4UserRunAction {
     public:
         run_action() {
-            auto logger_name =
-                    G4Threading::IsMasterThread() ?
-                    "Run Action: Master" :
-                    std::format("Run Action: {}", G4Threading::G4GetThreadId());
+            const auto logger_name =
+                G4Threading::IsMasterThread()
+                    ? "Run Action: Master"
+                    : std::format("Run Action: {}", G4Threading::G4GetThreadId());
 
-            _logger = SimREX::GEM::LoggerManager::getInstance()->createLogger(logger_name);
+            _logger = GEM::LoggerManager::getInstance()->createLogger(logger_name);
         };
 
         ~run_action() override = default;
 
-        void BeginOfRunAction(const G4Run *) override;
+        void BeginOfRunAction(const G4Run*) override;
 
-        void EndOfRunAction(const G4Run *) override;
+        void EndOfRunAction(const G4Run*) override;
 
     private:
         std::shared_ptr<spdlog::logger> _logger;
+
+        data_manager* _data_manager = nullptr;
     };
 }
 

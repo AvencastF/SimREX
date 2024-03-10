@@ -5,7 +5,7 @@
 #include "user-action/tracking_action.h"
 
 void SimREX::Simulation::tracking_action::PreUserTrackingAction(const G4Track *track) {
-    _logger->info("tracking action: pre user tracking action.");
+    // _logger->info("tracking action: pre user tracking action.");
 
 }
 

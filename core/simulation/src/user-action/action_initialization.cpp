@@ -8,7 +8,7 @@
 #include <G4SteppingManager.hh>
 #include <G4Threading.hh>
 
-#include "control/control.h"
+#include "control/database.h"
 
 #include "user-action/action_initialization.h"
 #include "user-action/run_action.h"
@@ -28,7 +28,7 @@ namespace SimREX::Simulation {
 
         // Set Verbosity
         G4RunManager *runManager = G4RunManager::GetRunManager();
-        runManager->SetVerboseLevel(control::Instance()->getValue<int>("verbosity/run"));
+        runManager->SetVerboseLevel(db::Instance()->get<int>("verbosity/run"));
     }
 
     void action_initialization::Build() const {
@@ -46,9 +46,9 @@ namespace SimREX::Simulation {
         G4EventManager *eventManager = G4EventManager::GetEventManager();
         G4TrackingManager *trackingManager = eventManager->GetTrackingManager();
         G4SteppingManager *steppingManager = trackingManager->GetSteppingManager();
-        eventManager->SetVerboseLevel(control::Instance()->getValue<int>("verbosity/event"));
-        trackingManager->SetVerboseLevel(control::Instance()->getValue<int>("verbosity/tracking"));
-        steppingManager->SetVerboseLevel(control::Instance()->getValue<int>("verbosity/stepping"));
+        eventManager->SetVerboseLevel(db::Instance()->get<int>("verbosity/event"));
+        trackingManager->SetVerboseLevel(db::Instance()->get<int>("verbosity/tracking"));
+        steppingManager->SetVerboseLevel(db::Instance()->get<int>("verbosity/stepping"));
     }
 
 }
