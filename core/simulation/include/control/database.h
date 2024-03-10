@@ -27,7 +27,7 @@
 #include <G4UImanager.hh>
 
 namespace SimREX::Simulation {
-    using VarType = std::variant<bool, int, double, std::string>;
+    using VarType = std::variant<bool, int, double, std::string, std::vector<int>, std::vector<double>>;
 
     class data_manager;
 
@@ -51,6 +51,8 @@ namespace SimREX::Simulation {
         void postReadYAML();
 
         void readAndSetGPS();
+
+        void readAndSetOutput();
 
         void printData();
 
@@ -96,10 +98,20 @@ namespace SimREX::Simulation {
                     const std::string& name,
                     VarType& variable,
                     T default_value,
-                    bool required = false
+                    const bool required = false,
+                    const std::string& method = ""
         ) {
+
             if (node[name].IsDefined()) {
-                variable = node[name].as<T>();
+                if (method.empty())
+                    variable = node[name].as<T>();
+                else if (method == "unit2") {
+                    variable = node[name][0].as<double>() * G4UnitDefinition::GetValueOf(node[name][1].as<std::string>());
+                }
+                else {
+                    _logger->error("Unknown method: {0}", method);
+                    exit(EXIT_FAILURE);
+                }
             }
             else {
                 if (required) {
@@ -107,7 +119,7 @@ namespace SimREX::Simulation {
                     exit(EXIT_FAILURE);
                 }
                 variable = default_value;
-                _logger->error("Node {0} not found in YAML file, using default: {1}", name, default_value);
+                _logger->error("Node {0} not found in YAML file, using default", name);
             }
         };
 

@@ -79,7 +79,8 @@ namespace SimREX::GEM {
 
         void initialize();
 
-        void registerHitCollection(const TString &col_name);
+        //! Register a hit collection with a given name
+        vector<hit*>* registerHitCollection(const TString &col_name);
 
         void removeHitCollection(const TString &col_name);
 

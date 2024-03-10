@@ -68,6 +68,7 @@ namespace SimREX::GEM {
             "hPairProd", // 43
             "nKiller", // 44
             "InitialStep", // 45
+            "OutOfWorld", // 46
         };
         /** the map of process types */
         unordered_map<string, int> dPhyTypeMap;

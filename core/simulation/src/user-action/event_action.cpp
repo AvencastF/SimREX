@@ -40,16 +40,26 @@ namespace SimREX::Simulation {
     }
 
     void event_action::EndOfEventAction(const G4Event* evt) {
-        // Record random seed numbers
-        const G4String& random_numbers_str = G4RunManager::GetRunManager()->GetRandomNumberStatusForThisEvent();
-        const auto random_numbers = retrieveNumbers(random_numbers_str);
 
-        auto data_manager = db::Instance()->getDataManager(G4Threading::G4GetThreadId());
-        data_manager->setEventInfo(db::Instance()->get<int>("run_number"), evt->GetEventID(), random_numbers);
-        data_manager->fill();
+        if (!evt->IsAborted()) {
+            // Record random seed numbers
+            const G4String& random_numbers_str = G4RunManager::GetRunManager()->GetRandomNumberStatusForThisEvent();
+            const auto random_numbers = retrieveNumbers(random_numbers_str);
+
+            const auto data_manager = db::Instance()->getDataManager(G4Threading::G4GetThreadId());
+            data_manager->setEventInfo(db::Instance()->get<int>("run_number"), evt->GetEventID(), random_numbers);
+            data_manager->fill();
 
 #ifdef DEBUG
-        _logger->info("End of event {}.", evt->GetEventID());
+            _logger->info("End of event {}.", evt->GetEventID());
 #endif
+        } else {
+            const auto data_manager = db::Instance()->getDataManager(G4Threading::G4GetThreadId());
+            data_manager->initialize();
+
+#ifdef DEBUG
+            _logger->error("Event {} is aborted.", evt->GetEventID());
+#endif
+        }
     }
 }

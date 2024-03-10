@@ -37,14 +37,15 @@ namespace SimREX::GEM {
         }
     }
 
-    void event::registerHitCollection(const TString& col_name) {
+    vector<hit*>* event::registerHitCollection(const TString& col_name) {
         if (_hit_collections.contains(col_name)) {
             _logger->warn("Hit collection {0} already exists", col_name.Data());
-            return;
+            return &_hit_collections[col_name];
         }
 
         _hit_collections[col_name] = vector<hit*>();
         _logger->info("Hit collection {0} registered", col_name.Data());
+        return &_hit_collections[col_name];
     }
 
     void event::removeHitCollection(const TString& col_name) {

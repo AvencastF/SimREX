@@ -4,7 +4,7 @@
 
 #include "control/data_manager.h"
 
-#include <utility>
+#include <G4VProcess.hh>
 
 
 namespace SimREX::Simulation {
@@ -27,7 +27,7 @@ namespace SimREX::Simulation {
         delete _event;
     }
 
-    void data_manager::initialize() {
+    void data_manager::initialize() const {
         _event->initialize();
     }
 
@@ -55,6 +55,12 @@ namespace SimREX::Simulation {
         _output_tree->Branch("event", "SimREX::GEM::event", &_event, 320000000);
     }
 
+    void data_manager::bookHitCollection(const std::string& col_name) const {
+        _logger->info("Booking hit collection: {}", col_name);
+
+        _event->registerHitCollection(col_name);
+    }
+
     void data_manager::fillParticles() {}
 
     void data_manager::fill() {
@@ -62,6 +68,16 @@ namespace SimREX::Simulation {
             _output_tree->Fill();
 
             _logger->info("Event: {} filled", _event_number);
+
+            // Print MC particles for test usage
+            for (const auto& particle : *_event->getMCParticles()) {
+                _logger->info(
+                    "Particle: {} with PDG: {}, State size: {}, Ek = {:.3f} MeV, P = {:.3f} MeV/c",
+                    particle->getId(), particle->getPdg(), particle->getStates().size(),
+                    (particle->getMomentum().e() - particle->getMomentum().mass()) / CLHEP::MeV,
+                    particle->getMomentum().P() / CLHEP::MeV
+                );
+            }
         }
     }
 
@@ -71,5 +87,35 @@ namespace SimREX::Simulation {
         _output_file->Close();
 
         _logger->info("Output file: {} saved", _output_file_name);
+    }
+
+    void data_manager::checkEventFilters(const G4Event* event) {}
+
+    void data_manager::checkTrackFilters(const G4Track* track) {
+        // record_all has the highest priority
+        if (db::Instance()->get<bool>("truth_filter/record_all")) {
+            _track_flags.record = true;
+            return;
+        }
+
+        // Filter on PDG
+        auto pdg_vec = db::Instance()->get<std::vector<int>>("truth_filter/PDG_applied_to_selections");
+        if (
+            const auto pdg = track->GetParticleDefinition()->GetPDGEncoding();
+            std::ranges::find(pdg_vec, pdg) != pdg_vec.end()
+        ) {
+            // Filter on Kinetic Energy
+            const auto energy = track->GetKineticEnergy();
+            _track_flags.record = energy >= db::Instance()->get<double>("truth_filter/e_kin_min_record");
+        }
+    }
+
+    void data_manager::checkStepFilters(const G4Step* step) {
+        _track_flags.step = _track_flags.record;
+        if (db::Instance()->get<bool>("truth_filter/record_spotless")) {
+            // only for the first step
+            _track_flags.step = false;
+            // for the last step, it should be added in the post tracking action
+        }
     }
 }

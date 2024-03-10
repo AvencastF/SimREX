@@ -87,6 +87,7 @@ namespace SimREX::GEM {
 
         void setParent(particle* parent) {
             _parent = parent;
+            _depth = parent->getDepth() + 1;
         }
 
         [[nodiscard]] const vector<particle*>& getChildren() const {
@@ -100,6 +101,19 @@ namespace SimREX::GEM {
         [[nodiscard]] const vector<particle_state>& getStates() const {
             return _states;
         }
+
+        [[nodiscard]] momentum_E getMomentum() const {
+            return _states.front().momentum;
+        }
+
+        [[nodiscard]] position_t getVertex() const {
+            return _states.front().position;
+        }
+
+        [[nodiscard]] position_t getEndVertex() const {
+            return _states.back().position;
+        }
+
 
         void addChild(particle* child);
 

@@ -35,14 +35,17 @@ namespace SimREX::Simulation {
 
     void stepping_action::UserSteppingAction(const G4Step* step) {
         auto* dm = db::Instance()->getDataManager(G4Threading::G4GetThreadId());
-        const auto track_id = step->GetTrack()->GetTrackID();
+        dm->checkStepFilters(step);
+        if (dm->getTrackFlags().step) {
+            const auto track_id = step->GetTrack()->GetTrackID();
 
-        auto* particle = dm->getEvent()->searchParticle(track_id);
-        if (!particle) {
-            _logger->error("Particle {0} not found", track_id);
-            return;
+            auto* particle = dm->getEvent()->searchParticle(track_id);
+            if (!particle) {
+                _logger->error("Particle {0} not found", track_id);
+                return;
+            }
+
+            addState(particle, step);
         }
-
-        // addState(particle, step);
     }
 }

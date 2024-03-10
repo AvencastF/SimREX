@@ -56,11 +56,8 @@ namespace SimREX::Simulation {
                         {"stepping", 0},
                     });
 
-        // Data Manager Configs
-        processNode(_node, "data_manager", {
-                        {"output_file_name", "sim.root"},
-                        {"output_tree_name", "sim"},
-                    });
+        // Output
+        readAndSetOutput();
 
         /*
          * Step 3: Reading General Particle Source
@@ -85,8 +82,14 @@ namespace SimREX::Simulation {
         for (const auto& [key, value] : data) {
             if (const auto sub_node = node[name]; sub_node.IsDefined()) {
                 std::visit([key, name, &sub_node, this](auto&& arg) {
+                    std::string _key = key;
+                    std::string method;
+                    if (const auto pos = std::ranges::find(key, '@'); pos != key.end()) {
+                        method = std::string{pos + 1, key.end()};
+                        _key = std::string{key.begin(), pos};
+                    }
                     using DecayedType = std::decay_t<decltype(arg)>;
-                    assign<DecayedType>(sub_node, key, _data[std::format("{0}/{1}", name, key)], arg);
+                    assign<DecayedType>(sub_node, _key, _data[std::format("{0}/{1}", name, _key)], arg, false, method);
                 }, value);
             }
             else {
@@ -120,7 +123,6 @@ namespace SimREX::Simulation {
         _logger->error("Data Manager for thread {} not found", thread_id);
         exit(EXIT_FAILURE);
     }
-
 
     void db::buildMaterialTable(const std::string& mat_file) {
         auto readMatDensity = [this](const YAML::Node& node) -> double {
@@ -229,11 +231,43 @@ namespace SimREX::Simulation {
         }
     }
 
+    void db::readAndSetOutput() {
+        // Data Manager Configs
+        processNode(_node, "data_manager", {
+                        {"output_file_name", "sim.root"},
+                        {"output_tree_name", "sim"},
+                    });
+
+        // Truth Filter
+        processNode(_node, "truth_filter", {
+                        {"PDG_applied_to_selections", std::vector<int>{-11, 11, 22}},
+                        {"e_kin_min_record@unit2", 0 * MeV},
+                        {"record_all", false},
+                        {"record_spotless", true},
+                    });
+    }
+
     void db::printData() {
         std::string detail;
         for (const auto& [key, value] : _data) {
             std::visit([key, &detail](auto&& arg) {
-                detail += std::format("\t{0:>40} : {1}\n", key, arg);
+                using T = std::decay_t<decltype(arg)>;
+                // For vector structure
+                if constexpr (
+                    std::is_same_v<T, std::vector<int>> ||
+                    std::is_same_v<T, std::vector<double>> ||
+                    std::is_same_v<T, std::vector<std::string>>
+                ) {
+                    detail += std::format("\t{0:>40} : [ ", key);
+                    for (const auto& i : arg) {
+                        detail += std::format("{}, ", i);
+                    }
+                    detail += std::format("] \n");
+                }
+                else {
+                    // For plain data type
+                    detail += std::format("\t{0:>40} : {1}\n", key, arg);
+                }
             }, value);
         }
         _logger->info("Control Data: \n{0}", detail);
