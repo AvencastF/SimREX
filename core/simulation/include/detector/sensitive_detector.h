@@ -8,6 +8,7 @@
 // core dependencies
 #include "global-event-model/logger.h"
 #include "global-event-model/hit.h"
+#include "control/database.h"
 
 // Geant4 dependencies
 #include <G4VSensitiveDetector.hh>
@@ -17,25 +18,19 @@
 #include <unordered_map>
 
 namespace SimREX::Simulation {
-    enum class det_type {
-        none,
-        tracker,
-        calorimeter
-    };
-
 
     class sensitive_detector final : G4VSensitiveDetector {
     public:
         sensitive_detector() = delete;
         ~sensitive_detector() override = default;
 
-        explicit sensitive_detector(const std::string& name, const G4String& output_tree_name, int thread_id);
+        explicit sensitive_detector(const std::string& name, const db::det_type& type, int thread_id);
 
         //! Initialize the sensitive detector
-        void initializeHits() const;
+        GEM::hit* initializeHits(const G4StepPoint* step, G4TouchableHistory* history);
 
         //! Process the hits in the sensitive detector
-        G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* history) override;
+        G4bool ProcessHits(G4Step* _step, G4TouchableHistory* history) override;
 
         //! End of event action
         void EndOfEvent(G4HCofThisEvent* hitCollection) override;
@@ -43,7 +38,7 @@ namespace SimREX::Simulation {
     private:
         std::shared_ptr<spdlog::logger> _logger;
 
-        det_type _type = det_type::none;
+        db::det_type _type = db::det_type::none;
         std::string _name;
 
         struct ArrayHasher {
@@ -54,6 +49,7 @@ namespace SimREX::Simulation {
                 return h1 ^ (h2 << 1) ^ (h3 << 2);
             }
         };
+
         std::unordered_map<std::array<int, 3>, GEM::hit*, ArrayHasher> _hits;
     };
 }

@@ -50,7 +50,7 @@ find_package(nlohmann_json 3.2.0 REQUIRED)
 find_package(OpenGL)
 
 # CERN ROOT with version >= 6.30
-find_package(ROOT 6.30 COMPONENTS Geom TMVA Eve Gui RGL EG REQUIRED)
+find_package(ROOT 6.30 COMPONENTS Geom TMVA Eve Gui RGL EG MathCore REQUIRED)
 IF (ROOT_FOUND)
     include_directories(SYSTEM ${ROOT_INCLUDE_DIRS})
     include_directories(SYSTEM ${ROOT_INCLUDE_DIR})

@@ -8,6 +8,7 @@
 // core dependencies
 #include "global-event-model/logger.h"
 #include "magnetic-field/magnetic_field.h"
+#include "control/database.h"
 
 // Geant4 dependencies
 #include <G4VUserDetectorConstruction.hh>
@@ -19,7 +20,6 @@
 #include "G4UserLimits.hh"
 
 namespace SimREX::Simulation {
-
     class detector_construction : public G4VUserDetectorConstruction {
     public:
         detector_construction();
@@ -28,13 +28,31 @@ namespace SimREX::Simulation {
         G4VPhysicalVolume* Construct() override;
         void ConstructSDandField() override;
 
+        //! Build World Volume
+        void buildWorldVolume(bool check_overlap = false);
+
+        //! Build Target
+        void buildTarget(bool check_overlap = false);
+
+        //! Build Tracker
+        void buildTracker(bool check_overlap = false);
+
+        //! Build Calorimeter
+        void buildCalorimeter(bool check_overlap = false);
+
     private:
+        double _eps = 1e-3 * mm;
+
         std::shared_ptr<spdlog::logger> _logger;
+
+        G4LogicalVolume* _world_LV = nullptr;
+        G4PVPlacement* _world_PV = nullptr;
+
+        std::array<double, 3> _world_size = {0, 0, 0};
 
         static G4ThreadLocal magnetic_field* _magneticField;
         static G4ThreadLocal G4FieldManager* _fieldMgr;
     };
-
 }
 
 

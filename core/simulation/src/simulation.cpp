@@ -17,6 +17,8 @@
 #include <G4RunManagerFactory.hh>
 #include <FTFP_BERT.hh>
 #include <Randomize.hh>
+#include <G4VisExecutive.hh>
+#include <G4UIExecutive.hh>
 
 namespace SimREX::Simulation {
     void run_simulation(
@@ -25,7 +27,8 @@ namespace SimREX::Simulation {
         int _random_seed,
         int _threads,
         const std::string& _log_file,
-        int _run_number
+        int _run_number,
+        bool _visual
     ) {
         if (!_log_file.empty()) {
             GEM::LoggerManager::getInstance()->setLogToFile(true);
@@ -92,7 +95,26 @@ namespace SimREX::Simulation {
         // Read and set GPS (set after primary generator action is initialized)
         db::Instance()->readAndSetGPS();
 
-        runManager->BeamOn(beam_on);
+        // Palce for visualization
+        if (_visual) {
+            const auto ui = new G4UIExecutive(1, new char*{const_cast<char*>("SimREX")});
+            const auto visManager = new G4VisExecutive();
+            visManager->Initialize();
+
+            auto* UImanager = G4UImanager::GetUIpointer();
+            UImanager->ApplyCommand("/vis/open");
+            for (const auto& command : vis_commands) {
+                UImanager->ApplyCommand(command);
+            }
+            // if (ui->IsGUI()) {
+            //     UImanager->ApplyCommand("/control/execute gui.mac");
+            // }
+            ui->SessionStart();
+            delete ui;
+        }
+        else {
+            runManager->BeamOn(beam_on);
+        }
 
         /* Job termination
         * Free the store: user actions, physics_list and detector_description are

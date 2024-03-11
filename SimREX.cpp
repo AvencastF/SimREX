@@ -34,6 +34,7 @@ struct SimArgs final : argparse::Args {
     int& run_number = kwarg(
         "n,run-number", "Run number. [optional]"
     ).set_default(0);
+    bool& visualization = flag("v,visualization", "Enable visualization. [optional]");
 
     void welcome() override {
         std::cout << "Simulation using Geant4" << std::endl;
@@ -44,7 +45,8 @@ struct SimArgs final : argparse::Args {
         logger->info("SimREX: Simulation starts.");
 
         SimREX::Simulation::run_simulation(
-            this->config_path, this->beam_on, this->random_seed, this->threads, this->log_file, this->run_number
+            this->config_path, this->beam_on, this->random_seed, this->threads,
+            this->log_file, this->run_number, this->visualization
         );
         return 0;
     }

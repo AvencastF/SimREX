@@ -27,7 +27,34 @@
 #include <G4UImanager.hh>
 
 namespace SimREX::Simulation {
-    using VarType = std::variant<bool, int, double, std::string, std::vector<int>, std::vector<double>>;
+    //! the infomation (x,y,z) of the tracker layer
+    using tracker_layer = std::vector<std::vector<double>>;
+
+    struct tracker {
+        std::string name;
+        std::string material;
+        double offset;
+        std::vector<int> strip_per_layer;
+        tracker_layer position;
+        tracker_layer size;
+        tracker_layer rotation;
+    };
+
+    struct tracker_region {
+        std::string name;
+        std::string material;
+        std::vector<double> position;
+        std::vector<tracker> daughters;
+
+        // should be computed
+        std::vector<double> size;
+    };
+
+    using VarType = std::variant<
+        bool, int, double, std::string,
+        std::vector<int>, std::vector<double>, std::vector<std::string>,
+        std::vector<tracker_region>
+    >;
 
     class data_manager;
 
@@ -51,8 +78,6 @@ namespace SimREX::Simulation {
         void postReadYAML();
 
         void readAndSetGPS();
-
-        void readAndSetOutput();
 
         void printData();
 
@@ -87,11 +112,46 @@ namespace SimREX::Simulation {
             return _process_map;
         }
 
+        enum class det_type {
+            none,
+            tracker,
+            calorimeter
+        };
+
     private:
         // Private constructor to prevent instantiation outside getInstance().
         db();
 
-        void buildMaterialTable(const std::string& mat_file);
+        void readAndSetOutput();
+
+        void buildMaterialTable(const std::string& mat_file, YAML::Node* _mat_node = nullptr) const;
+
+        void buildGeometry(const std::string& geo_file, YAML::Node* _geo_node = nullptr);
+
+        void buildTrackerLike(YAML::Node* _t_node);
+
+        double unit_2(const YAML::Node& _node) const {
+            // Sanity Check
+            if ((_node.size() != 2)) {
+                _logger->error("Vector size is incompatible with unit (2 expected)...");
+                exit(EXIT_FAILURE);
+            }
+
+            return _node[0].as<double>() * G4UnitDefinition::GetValueOf(_node[1].as<std::string>());
+        }
+
+        std::vector<double> unit_v3(YAML::Node _node) const {
+            // Sanity Check
+            if ((_node.size() != 6)) {
+                _logger->error("Vector size is incompatible with unit (6 expected)...");
+                exit(EXIT_FAILURE);
+            }
+            return std::vector{
+                _node[0].as<double>() * G4UnitDefinition::GetValueOf(_node[1].as<std::string>()),
+                _node[2].as<double>() * G4UnitDefinition::GetValueOf(_node[3].as<std::string>()),
+                _node[4].as<double>() * G4UnitDefinition::GetValueOf(_node[5].as<std::string>())
+            };
+        }
 
         template <typename T>
         void assign(const YAML::Node& node,
@@ -101,12 +161,14 @@ namespace SimREX::Simulation {
                     const bool required = false,
                     const std::string& method = ""
         ) {
-
             if (node[name].IsDefined()) {
                 if (method.empty())
                     variable = node[name].as<T>();
                 else if (method == "unit2") {
-                    variable = node[name][0].as<double>() * G4UnitDefinition::GetValueOf(node[name][1].as<std::string>());
+                    variable = unit_2(node[name]);
+                }
+                else if (method == "unit-v3") {
+                    variable = unit_v3(node[name]);
                 }
                 else {
                     _logger->error("Unknown method: {0}", method);
@@ -129,11 +191,11 @@ namespace SimREX::Simulation {
 
         std::unordered_map<std::string, VarType> _data;
 
-        // a map of data managers, indexed by thread id
+        //! a map of data managers, indexed by thread id
         std::unordered_map<int, data_manager*> _data_managers;
         std::mutex _data_managers_mutex;
 
-        // a map of physics process
+        //! a map of physics process
         std::unordered_map<string, int> _process_map;
     };
 }
