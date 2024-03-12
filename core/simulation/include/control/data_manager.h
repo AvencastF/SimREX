@@ -58,6 +58,9 @@ namespace SimREX::Simulation {
         //! Fill the MC particles in global-data-model event
         void fillParticles();
 
+        //! Fill hits in global-data-model event
+        void fillHits(const std::string& col_name, GEM::hit* hit) const;
+
         //! Fill the entry in the output tree
         void fill();
 

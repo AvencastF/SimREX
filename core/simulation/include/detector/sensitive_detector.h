@@ -19,15 +19,17 @@
 
 namespace SimREX::Simulation {
 
-    class sensitive_detector final : G4VSensitiveDetector {
+    class sensitive_detector final : public G4VSensitiveDetector {
     public:
         sensitive_detector() = delete;
         ~sensitive_detector() override = default;
 
         explicit sensitive_detector(const std::string& name, const db::det_type& type, int thread_id);
 
+
+
         //! Initialize the sensitive detector
-        GEM::hit* initializeHits(const G4StepPoint* step, G4TouchableHistory* history);
+        void initializeHits(GEM::hit* hit, const G4StepPoint* step, G4TouchableHistory* history);
 
         //! Process the hits in the sensitive detector
         G4bool ProcessHits(G4Step* _step, G4TouchableHistory* history) override;
@@ -38,8 +40,15 @@ namespace SimREX::Simulation {
     private:
         std::shared_ptr<spdlog::logger> _logger;
 
+        data_manager* _data_manager = nullptr;
+
         db::det_type _type = db::det_type::none;
         std::string _name;
+
+        // For tracker
+        int _id = -1;
+        int _layer = -1;
+        int _sub_layer = -1;
 
         struct ArrayHasher {
             std::size_t operator()(const std::array<int, 3>& arr) const {

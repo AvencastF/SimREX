@@ -63,6 +63,10 @@ namespace SimREX::Simulation {
 
     void data_manager::fillParticles() {}
 
+    void data_manager::fillHits(const std::string& col_name, GEM::hit* hit) const {
+        _event->getHits(col_name)->emplace_back(hit);
+    }
+
     void data_manager::fill() {
         if (_output_file && _output_tree) {
             _output_tree->Fill();
@@ -70,14 +74,14 @@ namespace SimREX::Simulation {
             _logger->info("Event: {} filled", _event_number);
 
             // Print MC particles for test usage
-            for (const auto& particle : *_event->getMCParticles()) {
-                _logger->info(
-                    "Particle: {} with PDG: {}, State size: {}, Ek = {:.3f} MeV, P = {:.3f} MeV/c",
-                    particle->getId(), particle->getPdg(), particle->getStates().size(),
-                    (particle->getMomentum().e() - particle->getMomentum().mass()) / CLHEP::MeV,
-                    particle->getMomentum().P() / CLHEP::MeV
-                );
-            }
+            // for (const auto& particle : *_event->getMCParticles()) {
+            //     _logger->info(
+            //         "Particle: {} with PDG: {}, State size: {}, Ek = {:.3f} MeV, P = {:.3f} MeV/c",
+            //         particle->getId(), particle->getPdg(), particle->getStates().size(),
+            //         (particle->getMomentum().e() - particle->getMomentum().mass()) / CLHEP::MeV,
+            //         particle->getMomentum().P() / CLHEP::MeV
+            //     );
+            // }
         }
     }
 

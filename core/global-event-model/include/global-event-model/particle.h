@@ -20,10 +20,30 @@ using position_t = ROOT::Math::XYZTVector;
 using momentum_E = ROOT::Math::PxPyPzEVector;
 
 namespace SimREX::GEM {
+
     class hit;
 
     class particle;
 
+    /**
+ * @struct particle_state
+ * @brief This struct represents the state of a particle at a given point in time.
+ *
+ * The `particle_state` struct is a data structure that stores information about a particle's state.
+ * It inherits from the TObject class, which is the base class for all objects in the ROOT system.
+ *
+ * A `particle_state` object contains the following information:
+ * - `process_id`: The ID of the process according to physics_process_def.h.
+ * - `dE`: The energy change in this state.
+ * - `hit`: A pointer to the hit object associated with this state.
+ * - `particle`: A pointer to the particle object associated with this state.
+ * - `position`: The position of the particle in this state, represented as a 4D vector (x, y, z, t).
+ * - `momentum`: The momentum of the particle in this state, represented as a 4D vector (px, py, pz, E).
+ *
+ * The struct provides a destructor to ensure that the pointers to the particle and hit objects are set to nullptr when the `particle_state` object is destroyed.
+ *
+ * @note The position and momentum are represented using ROOT's Math::XYZTVector and Math::PxPyPzEVector classes, respectively.
+ */
     struct particle_state final : TObject {
         int process_id = -1; // process ID according to physics_process_def.h
         double dE = 0; // energy change in this state
@@ -121,6 +141,18 @@ namespace SimREX::GEM {
 
         void addState(particle_state state);
 
+        void addHitCache(hit* _hit) {
+            if (!_hit_cache) {
+                _hit_cache = _hit;
+            }
+            else {
+                std::cerr << "Hit cache already exists" << std::endl;
+                _hit_cache = nullptr;
+            }
+        }
+
+        void processHitCache();
+
     private:
         // Track ID (unique for each track in the event)
         int _id = -1;
@@ -137,6 +169,8 @@ namespace SimREX::GEM {
          */
 
         vector<particle_state> _states = {};
+
+        hit* _hit_cache = nullptr;
 
         ClassDefOverride(particle, 1);
     };

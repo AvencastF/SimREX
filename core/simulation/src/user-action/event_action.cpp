@@ -40,7 +40,6 @@ namespace SimREX::Simulation {
     }
 
     void event_action::EndOfEventAction(const G4Event* evt) {
-
         if (!evt->IsAborted()) {
             // Record random seed numbers
             const G4String& random_numbers_str = G4RunManager::GetRunManager()->GetRandomNumberStatusForThisEvent();
@@ -49,11 +48,13 @@ namespace SimREX::Simulation {
             const auto data_manager = db::Instance()->getDataManager(G4Threading::G4GetThreadId());
             data_manager->setEventInfo(db::Instance()->get<int>("run_number"), evt->GetEventID(), random_numbers);
             data_manager->fill();
+            data_manager->initialize();
 
 #ifdef DEBUG
             _logger->info("End of event {}.", evt->GetEventID());
 #endif
-        } else {
+        }
+        else {
             const auto data_manager = db::Instance()->getDataManager(G4Threading::G4GetThreadId());
             data_manager->initialize();
 

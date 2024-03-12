@@ -34,9 +34,9 @@ namespace SimREX::Simulation {
         std::string name;
         std::string material;
         double offset;
-        std::vector<int> strip_per_layer;
-        tracker_layer position;
-        tracker_layer size;
+        int strip_per_layer;
+        std::vector<double> position;
+        std::vector<double> size;
         tracker_layer rotation;
     };
 

@@ -40,5 +40,16 @@ namespace SimREX::GEM {
         if (state.particle != this) {
             state.particle = this;
         }
+
+        processHitCache();
+    }
+
+    void particle::processHitCache() {
+        if (_hit_cache) {
+            auto* current_state = &_states.back();
+            current_state->hit = _hit_cache;
+            // _hit_cache->addParticleContribution(current_state);
+            _hit_cache = nullptr;
+        }
     }
 }

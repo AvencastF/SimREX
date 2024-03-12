@@ -3,8 +3,10 @@
 //
 
 #include "detector/detector_construction.h"
+#include "detector/sensitive_detector.h"
 
 #include <ranges>
+#include <cmath>
 
 #include <G4Material.hh>
 #include <G4NistManager.hh>
@@ -12,6 +14,7 @@
 #include <G4SystemOfUnits.hh>
 #include <G4Threading.hh>
 #include <G4VisAttributes.hh>
+#include <G4PVParameterised.hh>
 
 #include <Math/RotationX.h>
 #include <Math/RotationY.h>
@@ -37,19 +40,22 @@ namespace SimREX::Simulation {
 
     detector_construction::~detector_construction() {
         _logger->info("destructor called.");
+
+        for (auto& [name, sub_layer_placement] : _sub_layer_placement)
+            delete sub_layer_placement;
     }
 
     G4VPhysicalVolume* detector_construction::Construct() {
         _logger->info("construct called.");
 
-        bool checkOverlaps = true;
+        const bool check_overlap = false;
 
         // geometries
         buildWorldVolume();
 
         buildTarget();
 
-        buildTracker();
+        buildTracker(check_overlap);
 
         buildCalorimeter();
 
@@ -67,7 +73,16 @@ namespace SimREX::Simulation {
 #ifdef DEBUG
         _logger->info("construct SD and field called.");
 #endif
-        // magnetic field ----------------------------------------------------------
+
+        // Sensitive Detector
+        for (const auto& [_, _placement] : _sub_layer_placement) {
+            for (const auto& [_name, _lv] : _placement->get_tracker().strips_LV) {
+                const auto sd = new sensitive_detector(_name, db::det_type::tracker, G4Threading::G4GetThreadId());
+                _lv->SetSensitiveDetector(sd);
+            }
+        }
+
+        // magnetic field
         _magneticField = new magnetic_field();
         _fieldMgr = new G4FieldManager();
         _fieldMgr->SetDetectorField(_magneticField);
@@ -99,10 +114,17 @@ namespace SimREX::Simulation {
     void detector_construction::buildTracker(bool check_overlap) {
         const auto build_list = db::Instance()->get<std::vector<std::string>>("build-list");
 
+        /*
+         * Tracker Region
+         *   - layer
+         *     - sub-layer
+         *       - strip
+         */
+
         // Build Tracker Region Mannually
         for (
             auto tracker_regions = db::Instance()->get<std::vector<tracker_region>>("tracker-like");
-            auto& [name, material, position, daughters, size] : tracker_regions
+            auto& [name, material, position, layers, size] : tracker_regions
         ) {
             if (std::ranges::find(build_list, name) == build_list.end()) {
                 _logger->warn("tracker region [{}] not in the building list, IGNORE", name);
@@ -111,79 +133,72 @@ namespace SimREX::Simulation {
 
             _logger->info("building tracker region [{}]", name);
 
-            auto pre_computing_size = [name, daughters, this]() {
-                std::map<std::string, std::vector<double>> size_map = {
-                    {name, {0, 0, 0}}
-                };
+            auto pre_computing_size = [name, layers, this]() {
+                std::vector<double> max_size = {0, 0, 0};
 
                 // For each daughter, compute the max size
-                for (const auto& trk : daughters) {
+                for (const auto& layer : layers) {
                     // Step 1: Find the index of the max of abs of the position (mother need to be square)
-                    auto find_max_index = [trk, this](int axis) {
-                        assert(trk.position.size() == trk.size.size());
+                    auto find_max_index = [layer, this](int axis) {
+                        assert(layer.position.size() == layer.size.size());
 
-                        const bool use_rotation = !trk.rotation.empty();
+                        const double x = layer.size[0] / 2.0;
+                        const double y = layer.size[1] / 2.0;
+                        const double z = layer.size[2] / 2.0 + layer.offset + 2 * _eps;
 
-                        const auto max_position_size = std::ranges::max(
-                            trk.position | std::views::transform(
-                                [&](const auto& pos) {
-                                    const double x = trk.size[&pos - &trk.position[0]][0] / 2.0;
-                                    const double y = trk.size[&pos - &trk.position[0]][1] / 2.0;
-                                    const double z = trk.size[&pos - &trk.position[0]][2] / 2.0;
+                        double max_size_axis;
+                        if (!layer.rotation.empty()) {
+                            // default geometry is box, calculate the 8 vertices
+                            const std::vector<XYZVector> vertices = {
+                                {x, y, z},
+                                {x, -y, z},
+                                {x, y, -z},
+                                {x, -y, -z},
+                                {-x, y, z},
+                                {-x, -y, z},
+                                {-x, y, -z},
+                                {-x, -y, -z}
+                            };
 
-                                    if (use_rotation) {
-                                        // default geometry is box, calculate the 8 vertices
-                                        std::vector<XYZVector> vertices = {
-                                            {x, y, z},
-                                            {x, -y, z},
-                                            {x, y, -z},
-                                            {x, -y, -z},
-                                            {-x, y, z},
-                                            {-x, -y, z},
-                                            {-x, y, -z},
-                                            {-x, -y, -z}
-                                        };
+                            double max_len = 0;
+                            for (const auto& rot : layer.rotation) {
+                                // define rotation
+                                const auto rot_x = RotationX(rot[0]);
+                                const auto rot_y = RotationY(rot[1]);
+                                const auto rot_z = RotationZ(rot[2]);
 
-                                        // define rotation
-                                        const auto rot_x = RotationX(trk.rotation[&pos - &trk.position[0]][0]);
-                                        const auto rot_y = RotationY(trk.rotation[&pos - &trk.position[0]][1]);
-                                        const auto rot_z = RotationZ(trk.rotation[&pos - &trk.position[0]][2]);
-
-                                        double max_len = 0;
-                                        for (const auto& vertex : vertices) {
-                                            XYZVector new_vertex = rot_z(rot_y(rot_x(vertex)));
-                                            if (axis == 0) max_len = std::max(max_len, std::abs(new_vertex.x()));
-                                            if (axis == 1) max_len = std::max(max_len, std::abs(new_vertex.y()));
-                                            if (axis == 2) max_len = std::max(max_len, std::abs(new_vertex.z()));
-                                        }
-                                        return std::abs(pos[axis]) + max_len;
-                                    }
-                                    return std::abs(pos[axis]) + trk.size[&pos - &trk.position[0]][axis] / 2.0;
+                                for (const auto& vertex : vertices) {
+                                    XYZVector new_vertex = rot_z(rot_y(rot_x(vertex)));
+                                    if (axis == 0) max_len = std::max(max_len, std::abs(new_vertex.x()));
+                                    if (axis == 1) max_len = std::max(max_len, std::abs(new_vertex.y()));
+                                    if (axis == 2) max_len = std::max(max_len, std::abs(new_vertex.z()));
                                 }
-                            )
-                        );
+                            }
+                            max_size_axis = max_len;
+                        }
+                        else {
+                            max_size_axis = layer.size[axis] / 2.0;
+                        }
                         // return the maximum position+size (convert half length to size) for each daughter
-                        return max_position_size * 2 + _eps;
+                        return (max_size_axis + std::abs(layer.position[axis]) + layer.offset) * 2 + 2 * _eps;
                     };
 
-                    size_map[trk.name] = {
+                    max_size = {
                         find_max_index(0),
                         find_max_index(1),
                         find_max_index(2)
                     };
 
-                    size_map[name] = {
-                        std::max(size_map[name][0], find_max_index(0)),
-                        std::max(size_map[name][1], find_max_index(1)),
-                        std::max(size_map[name][2], find_max_index(2))
+                    max_size = {
+                        std::max(max_size[0], find_max_index(0)),
+                        std::max(max_size[1], find_max_index(1)),
+                        std::max(max_size[2], find_max_index(2))
                     };
                 }
-
-                return size_map;
+                return max_size;
             };
 
-            auto size_map = pre_computing_size();
-            size = size_map[name];
+            size = pre_computing_size();
             db::Instance()->set(std::format("tracker-like/{}/size", name), size);
 
             // Step 1: Build Region
@@ -199,24 +214,52 @@ namespace SimREX::Simulation {
             );
 
             // Step 2: Build Daughter Layers
-            for (const auto& trk : daughters) {
-                auto daughter_size = size_map[trk.name];
-
+            for (const auto& layer : layers) {
                 const auto trk_solid = new G4Box(
-                    std::format("{}_box", trk.name),
-                    daughter_size[0] / 2., daughter_size[1] / 2., daughter_size[2] / 2.
+                    std::format("{}_box", layer.name),
+                    (size[0] - _eps) / 2., (size[1] - _eps) / 2., layer.size[2] / 2.0 + layer.offset + _eps
                 );
-                const auto trk_mat = G4NistManager::Instance()->FindOrBuildMaterial(trk.material);
+                const auto trk_mat = G4NistManager::Instance()->FindOrBuildMaterial(material);
                 const auto trk_LV = new G4LogicalVolume(
-                    trk_solid, trk_mat, std::format("{}_LV", trk.name));
-
+                    trk_solid, trk_mat, std::format("{}_LV", layer.name));
 
                 new G4PVPlacement(
-                    nullptr, G4ThreeVector(0, 0, 0),
-                    trk_LV, trk.name, tracker_region_LV, false, 0, check_overlap
+                    nullptr, G4ThreeVector(layer.position[0], layer.position[1], layer.position[2]),
+                    trk_LV, layer.name, tracker_region_LV, false, 0, check_overlap
                 );
-            }
 
+                _logger->info(
+                    "Layer {}, position [{}, {}, {}], size [{}, {}, {}], build size [{}, {}, {}]",
+                    layer.name, layer.position[0], layer.position[1], layer.position[2],
+                    layer.size[0], layer.size[1], layer.size[2],
+                    (size[0] - _eps), (size[1] - _eps), layer.size[2] + 2 * layer.offset + _eps
+                );
+
+                // For each sub-layer in layer, place the detailed geometry
+                auto sub_layer_name = std::format("{}_layer", layer.name);
+                _sub_layer_placement[sub_layer_name] = new matrix_parameterization(
+                    layer.material, layer.name,
+                    {layer.size[0], layer.size[1], layer.size[2]},
+                    {layer.position[0], layer.position[1], layer.position[2]},
+                    layer.rotation,
+                    layer.offset, layer.strip_per_layer,
+                    trk_LV,
+                    check_overlap
+                );
+
+                const auto _sub_layer = _sub_layer_placement[sub_layer_name]->get_tracker();
+                for (const auto& [_sub_layer_name, sub_layer_LV] : _sub_layer.sub_layers_LV) {
+                    new G4PVParameterised(
+                        sub_layer_name, // Name
+                        _sub_layer.strips_LV.at(_sub_layer_name), // Logical volume
+                        sub_layer_LV, // Mother logival volume
+                        kYAxis, // Aare placed along this axis
+                        _sub_layer.strip_per_sub_layer, // number of strips
+                        _sub_layer_placement[sub_layer_name], // The parametrisation
+                        check_overlap // check overlap
+                    );
+                }
+            }
 
             // Step 3: Update World Size
             _logger->warn("Updating world size");

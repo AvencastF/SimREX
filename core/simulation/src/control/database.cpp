@@ -286,10 +286,10 @@ namespace SimREX::Simulation {
                     return layer;
                 };
 
-                daughter.position = read_layer(_trk_node["position"]);
-                daughter.size = read_layer(_trk_node["size"]);
+                daughter.position = unit_v3(_trk_node["position"]);
+                daughter.size = unit_v3(_trk_node["size"]);
                 daughter.rotation = read_layer(_trk_node["rotation"]);
-                daughter.strip_per_layer = _trk_node["strip_per_layer"].as<std::vector<int>>();
+                daughter.strip_per_layer = _trk_node["strip_per_layer"].as<int>();
 
                 trk_reg.daughters.emplace_back(daughter);
             }
