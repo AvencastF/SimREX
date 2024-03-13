@@ -29,8 +29,8 @@ using Rotation3D = ROOT::Math::Rotation3D;
 using XYZVector = ROOT::Math::XYZVector;
 
 namespace SimREX::Simulation {
-    G4ThreadLocal magnetic_field* detector_construction::_magneticField = nullptr;
-    G4ThreadLocal G4FieldManager* detector_construction::_fieldMgr = nullptr;
+    G4ThreadLocal magnetic_field *detector_construction::_magneticField = nullptr;
+    G4ThreadLocal G4FieldManager *detector_construction::_fieldMgr = nullptr;
 
 
     detector_construction::detector_construction() {
@@ -41,11 +41,11 @@ namespace SimREX::Simulation {
     detector_construction::~detector_construction() {
         _logger->info("destructor called.");
 
-        for (auto& [name, sub_layer_placement] : _sub_layer_placement)
+        for (auto &[name, sub_layer_placement]: _sub_layer_placement)
             delete sub_layer_placement;
     }
 
-    G4VPhysicalVolume* detector_construction::Construct() {
+    G4VPhysicalVolume *detector_construction::Construct() {
         _logger->info("construct called.");
 
         const bool check_overlap = false;
@@ -53,14 +53,14 @@ namespace SimREX::Simulation {
         // geometries
         buildWorldVolume();
 
-        buildTarget();
+        buildTarget(check_overlap);
 
         buildTracker(check_overlap);
 
         buildCalorimeter();
 
         // update world size and return
-        const auto world_box = dynamic_cast<G4Box*>(_world_LV->GetSolid());
+        const auto world_box = dynamic_cast<G4Box *>(_world_LV->GetSolid());
         world_box->SetXHalfLength(_world_size[0] / 2.0);
         world_box->SetYHalfLength(_world_size[1] / 2.0);
         world_box->SetZHalfLength(_world_size[2] / 2.0);
@@ -74,9 +74,9 @@ namespace SimREX::Simulation {
         _logger->info("construct SD and field called.");
 #endif
 
-        // Sensitive Detector
-        for (const auto& [_, _placement] : _sub_layer_placement) {
-            for (const auto& [_name, _lv] : _placement->get_tracker().strips_LV) {
+        // Sensitive Detector for trackers
+        for (const auto &[_, _placement]: _sub_layer_placement) {
+            for (const auto &[_name, _lv]: _placement->get_tracker().strips_LV) {
                 const auto sd = new sensitive_detector(_name, db::det_type::tracker, G4Threading::G4GetThreadId());
                 _lv->SetSensitiveDetector(sd);
             }
@@ -95,21 +95,41 @@ namespace SimREX::Simulation {
         // experimental hall (world volume)
 
         const auto material = db::Instance()->get<std::string>("world/material");
-        G4Material* world_mat = G4NistManager::Instance()->FindOrBuildMaterial(material);
+        G4Material *world_mat = G4NistManager::Instance()->FindOrBuildMaterial(material);
 
         const auto size = db::Instance()->get<std::vector<double>>("world/size");
         _world_size = {size[0], size[1], size[2]};
 
         const auto world_solid = new G4Box(
-            "world_box",
-            _world_size[0] / 2.0, _world_size[1] / 2.0, _world_size[2] / 2.0
+                "world_box",
+                _world_size[0] / 2.0, _world_size[1] / 2.0, _world_size[2] / 2.0
         );
         _world_LV = new G4LogicalVolume(world_solid, world_mat, "world_LV");
         _world_PV = new G4PVPlacement(
-            nullptr, G4ThreeVector(), _world_LV, "world", nullptr, false, 0, check_overlap);
+                nullptr, G4ThreeVector(), _world_LV, "world", nullptr, false, 0, check_overlap);
     }
 
-    void detector_construction::buildTarget(bool check_overlap) {}
+    void detector_construction::buildTarget(bool check_overlap) {
+        const auto material = db::Instance()->get<std::string>("target/material");
+        G4Material *target_mat = G4NistManager::Instance()->FindOrBuildMaterial(material);
+
+        const auto size = db::Instance()->get<std::vector<double>>("target/size");
+        std::array<double, 3> target_size = {size[0], size[1], size[2]};
+
+        const auto target_solid = new G4Box(
+                "target_box",
+                target_size[0] / 2.0, target_size[1] / 2.0, target_size[2] / 2.0
+        );
+        auto target_LV = new G4LogicalVolume(target_solid, target_mat, "target_LV");
+        new G4PVPlacement(nullptr, G4ThreeVector(), target_LV, "target", _world_LV, false, 0, check_overlap);
+
+        // Assuming you have a pointer to a G4LogicalVolume named 'logicalVolume'
+
+        auto* visAttributes = new G4VisAttributes(G4Colour(0.0,1.0,0.0)); // Green color
+
+        visAttributes->SetVisibility(true);
+        target_LV->SetVisAttributes(visAttributes);
+    }
 
     void detector_construction::buildTracker(bool check_overlap) {
         const auto build_list = db::Instance()->get<std::vector<std::string>>("build-list");
@@ -123,9 +143,9 @@ namespace SimREX::Simulation {
 
         // Build Tracker Region Mannually
         for (
-            auto tracker_regions = db::Instance()->get<std::vector<tracker_region>>("tracker-like");
-            auto& [name, material, position, layers, size] : tracker_regions
-        ) {
+                auto tracker_regions = db::Instance()->get<std::vector<tracker_region>>("tracker-like");
+                auto &[name, material, position, layers, size]: tracker_regions
+                ) {
             if (std::ranges::find(build_list, name) == build_list.end()) {
                 _logger->warn("tracker region [{}] not in the building list, IGNORE", name);
                 continue;
@@ -137,7 +157,7 @@ namespace SimREX::Simulation {
                 std::vector<double> max_size = {0, 0, 0};
 
                 // For each daughter, compute the max size
-                for (const auto& layer : layers) {
+                for (const auto &layer: layers) {
                     // Step 1: Find the index of the max of abs of the position (mother need to be square)
                     auto find_max_index = [layer, this](int axis) {
                         assert(layer.position.size() == layer.size.size());
@@ -150,24 +170,24 @@ namespace SimREX::Simulation {
                         if (!layer.rotation.empty()) {
                             // default geometry is box, calculate the 8 vertices
                             const std::vector<XYZVector> vertices = {
-                                {x, y, z},
-                                {x, -y, z},
-                                {x, y, -z},
-                                {x, -y, -z},
-                                {-x, y, z},
-                                {-x, -y, z},
-                                {-x, y, -z},
-                                {-x, -y, -z}
+                                    {x,  y,  z},
+                                    {x,  -y, z},
+                                    {x,  y,  -z},
+                                    {x,  -y, -z},
+                                    {-x, y,  z},
+                                    {-x, -y, z},
+                                    {-x, y,  -z},
+                                    {-x, -y, -z}
                             };
 
                             double max_len = 0;
-                            for (const auto& rot : layer.rotation) {
+                            for (const auto &rot: layer.rotation) {
                                 // define rotation
                                 const auto rot_x = RotationX(rot[0]);
                                 const auto rot_y = RotationY(rot[1]);
                                 const auto rot_z = RotationZ(rot[2]);
 
-                                for (const auto& vertex : vertices) {
+                                for (const auto &vertex: vertices) {
                                     XYZVector new_vertex = rot_z(rot_y(rot_x(vertex)));
                                     if (axis == 0) max_len = std::max(max_len, std::abs(new_vertex.x()));
                                     if (axis == 1) max_len = std::max(max_len, std::abs(new_vertex.y()));
@@ -175,8 +195,7 @@ namespace SimREX::Simulation {
                                 }
                             }
                             max_size_axis = max_len;
-                        }
-                        else {
+                        } else {
                             max_size_axis = layer.size[axis] / 2.0;
                         }
                         // return the maximum position+size (convert half length to size) for each daughter
@@ -184,15 +203,15 @@ namespace SimREX::Simulation {
                     };
 
                     max_size = {
-                        find_max_index(0),
-                        find_max_index(1),
-                        find_max_index(2)
+                            find_max_index(0),
+                            find_max_index(1),
+                            find_max_index(2)
                     };
 
                     max_size = {
-                        std::max(max_size[0], find_max_index(0)),
-                        std::max(max_size[1], find_max_index(1)),
-                        std::max(max_size[2], find_max_index(2))
+                            std::max(max_size[0], find_max_index(0)),
+                            std::max(max_size[1], find_max_index(1)),
+                            std::max(max_size[2], find_max_index(2))
                     };
                 }
                 return max_size;
@@ -203,60 +222,60 @@ namespace SimREX::Simulation {
 
             // Step 1: Build Region
             const auto tracker_region_solid = new G4Box(
-                std::format("{}_box", name), size[0] / 2., size[1] / 2., size[2] / 2.);
+                    std::format("{}_box", name), size[0] / 2., size[1] / 2., size[2] / 2.);
             const auto tracker_region_mat = G4NistManager::Instance()->FindOrBuildMaterial(material);
             const auto tracker_region_LV = new G4LogicalVolume(
-                tracker_region_solid, tracker_region_mat, std::format("{}_LV", name));
+                    tracker_region_solid, tracker_region_mat, std::format("{}_LV", name));
 
             new G4PVPlacement(
-                nullptr, G4ThreeVector(position[0], position[1], position[2]),
-                tracker_region_LV, name, _world_LV, false, 0, check_overlap
+                    nullptr, G4ThreeVector(position[0], position[1], position[2]),
+                    tracker_region_LV, name, _world_LV, false, 0, check_overlap
             );
 
             // Step 2: Build Daughter Layers
-            for (const auto& layer : layers) {
+            for (const auto &layer: layers) {
                 const auto trk_solid = new G4Box(
-                    std::format("{}_box", layer.name),
-                    (size[0] - _eps) / 2., (size[1] - _eps) / 2., layer.size[2] / 2.0 + layer.offset + _eps
+                        std::format("{}_box", layer.name),
+                        (size[0] - _eps) / 2., (size[1] - _eps) / 2., layer.size[2] / 2.0 + layer.offset + _eps
                 );
                 const auto trk_mat = G4NistManager::Instance()->FindOrBuildMaterial(material);
                 const auto trk_LV = new G4LogicalVolume(
-                    trk_solid, trk_mat, std::format("{}_LV", layer.name));
+                        trk_solid, trk_mat, std::format("{}_LV", layer.name));
 
                 new G4PVPlacement(
-                    nullptr, G4ThreeVector(layer.position[0], layer.position[1], layer.position[2]),
-                    trk_LV, layer.name, tracker_region_LV, false, 0, check_overlap
+                        nullptr, G4ThreeVector(layer.position[0], layer.position[1], layer.position[2]),
+                        trk_LV, layer.name, tracker_region_LV, false, 0, check_overlap
                 );
 
                 _logger->info(
-                    "Layer {}, position [{}, {}, {}], size [{}, {}, {}], build size [{}, {}, {}]",
-                    layer.name, layer.position[0], layer.position[1], layer.position[2],
-                    layer.size[0], layer.size[1], layer.size[2],
-                    (size[0] - _eps), (size[1] - _eps), layer.size[2] + 2 * layer.offset + _eps
+                        "Layer {}, position [{}, {}, {}], size [{}, {}, {}], build size [{}, {}, {}]",
+                        layer.name, layer.position[0], layer.position[1], layer.position[2],
+                        layer.size[0], layer.size[1], layer.size[2],
+                        (size[0] - _eps), (size[1] - _eps), layer.size[2] + 2 * layer.offset + _eps
                 );
 
                 // For each sub-layer in layer, place the detailed geometry
                 auto sub_layer_name = std::format("{}_layer", layer.name);
                 _sub_layer_placement[sub_layer_name] = new matrix_parameterization(
-                    layer.material, layer.name,
-                    {layer.size[0], layer.size[1], layer.size[2]},
-                    {layer.position[0], layer.position[1], layer.position[2]},
-                    layer.rotation,
-                    layer.offset, layer.strip_per_layer,
-                    trk_LV,
-                    check_overlap
+                        layer.material, layer.name,
+                        {layer.size[0], layer.size[1], layer.size[2]},
+                        {layer.position[0], layer.position[1], layer.position[2]},
+                        layer.rotation,
+                        layer.offset, layer.strip_per_layer,
+                        trk_LV,
+                        check_overlap
                 );
 
                 const auto _sub_layer = _sub_layer_placement[sub_layer_name]->get_tracker();
-                for (const auto& [_sub_layer_name, sub_layer_LV] : _sub_layer.sub_layers_LV) {
+                for (const auto &[_sub_layer_name, sub_layer_LV]: _sub_layer.sub_layers_LV) {
                     new G4PVParameterised(
-                        sub_layer_name, // Name
-                        _sub_layer.strips_LV.at(_sub_layer_name), // Logical volume
-                        sub_layer_LV, // Mother logival volume
-                        kYAxis, // Aare placed along this axis
-                        _sub_layer.strip_per_sub_layer, // number of strips
-                        _sub_layer_placement[sub_layer_name], // The parametrisation
-                        check_overlap // check overlap
+                            sub_layer_name, // Name
+                            _sub_layer.strips_LV.at(_sub_layer_name), // Logical volume
+                            sub_layer_LV, // Mother logival volume
+                            kYAxis, // Aare placed along this axis
+                            _sub_layer.strip_per_sub_layer, // number of strips
+                            _sub_layer_placement[sub_layer_name], // The parametrisation
+                            check_overlap // check overlap
                     );
                 }
             }
@@ -267,9 +286,9 @@ namespace SimREX::Simulation {
             _logger->warn("new tracker region size: [{}, {}, {}]", size[0], size[1], size[2]);
 
             _world_size = {
-                std::max(_world_size[0], size[0] + 2 * std::abs(position[0])) + 1 * cm,
-                std::max(_world_size[1], size[1] + 2 * std::abs(position[1])) + 1 * cm,
-                std::max(_world_size[2], size[2] + 2 * std::abs(position[2])) + 1 * cm
+                    std::max(_world_size[0], size[0] + 2 * std::abs(position[0])) + 1 * cm,
+                    std::max(_world_size[1], size[1] + 2 * std::abs(position[1])) + 1 * cm,
+                    std::max(_world_size[2], size[2] + 2 * std::abs(position[2])) + 1 * cm
             };
 
             _logger->warn("new world size: [{}, {}, {}]", _world_size[0], _world_size[1], _world_size[2]);
