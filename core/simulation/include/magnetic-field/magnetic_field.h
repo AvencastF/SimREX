@@ -9,9 +9,9 @@
 #include "global-event-model/logger.h"
 
 // Geant4 dependencies
-#include "globals.hh"
-#include "G4MagneticField.hh"
-#include "G4SystemOfUnits.hh"
+#include <globals.hh>
+#include <G4MagneticField.hh>
+#include <G4SystemOfUnits.hh>
 
 namespace SimREX::Simulation {
 

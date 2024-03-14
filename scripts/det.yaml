@@ -1,0 +1,157 @@
+---
+# Begin of File
+# For SimREX
+# Default Detector Geometry Configuration by Yulei Zhang
+
+# IMPORTANT: For yaml, indentation matters!
+
+#### Box
+# half-length of the box
+
+world:
+  # World Material
+  material: "G4_AIR"
+  # World Size (default geometry is box)
+  # If not defined, the default size is calculated by the maximum size of the detector
+  size: [ 5, "m", 5, "m", 5, "m" ]
+  # Position of the world
+  # Unnecessary to define the position of the world
+
+# Detector Geometry
+build-list:
+  - "tag_trk_region"
+  - "rec_trk_region"
+
+# each unit is a strip along x/y direction
+tracker-like:
+  - name: "tag_trk_region"
+    material: "vacuum"
+    position: [ 0, "mm", 0, "mm", -300, "mm" ]
+    daughters:
+      - name: "tag_trk_layer_1"
+        material: "G4_Si"
+        size: [ 20.1 , "cm", 10 , "cm", 0.15 , "mm" ] # Layer 1
+        position: [ 0 , "cm", 0 , "cm", -30 , "cm" ] # Layer 1
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 1
+          - [ 0, "radian" , 0 , "radian" , 0.05 , "radian" ] #Layer 1
+        strip_per_layer: 6700
+        # offset to globally move this component (in the mother volume coordinate system)
+        offset: [ 0.08, "mm" ]
+      - name: "tag_trk_layer_2"
+        material: "G4_Si"
+        size: [ 20.1 , "cm", 10 , "cm", 0.15 , "mm" ] # Layer 2
+        position: [ 0 , "cm", 0 , "cm", -20 , "cm" ] # Layer 2
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 2
+          - [ 0, "radian" , 0 , "radian" , -0.05 , "radian" ] #Layer 2
+        strip_per_layer: 6700
+        offset: [ 0.08, "mm" ]
+      - name: "tag_trk_layer_3"
+        material: "G4_Si"
+        size: [ 20.1 , "cm", 10 , "cm", 0.15 , "mm" ] # Layer 3
+        position: [ 0 , "cm", 0 , "cm", -10 , "cm" ] # Layer 3
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 3
+          - [ 0, "radian" , 0 , "radian" , 0.05 , "radian" ] #Layer 3
+        strip_per_layer: 6700
+        offset: [ 0.08, "mm" ]
+      - name: "tag_trk_layer_4"
+        material: "G4_Si"
+        size: [ 20.1 , "cm", 10 , "cm", 0.15 , "mm" ] # Layer 4
+        position: [ 0 , "cm", 0 , "cm", 0 , "cm" ] # Layer 4
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 4
+          - [ 0, "radian" , 0 , "radian" , -0.05 , "radian" ] #Layer 4
+        strip_per_layer: 6700
+        offset: [ 0.08, "mm" ]
+      - name: "tag_trk_layer_5"
+        material: "G4_Si"
+        size: [ 20.1 , "cm", 10 , "cm", 0.15 , "mm" ] # Layer 5
+        position: [ 0 , "cm", 0 , "cm", 10 , "cm" ] # Layer 5
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 5
+          - [ 0, "radian" , 0 , "radian" , 0.05 , "radian" ] #Layer 5
+        strip_per_layer: 6700
+        offset: [ 0.08, "mm" ]
+      - name: "tag_trk_layer_6"
+        material: "G4_Si"
+        size: [ 20.1 , "cm", 10 , "cm", 0.15 , "mm" ] # Layer 6
+        position: [ 0 , "cm", 0 , "cm", 20 , "cm" ] # Layer 6
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 6
+          - [ 0, "radian" , 0 , "radian" , -0.05 , "radian" ] #Layer 6
+        strip_per_layer: 6700
+        # offset to globally move this component (in the mother volume coordinate system)
+        offset: [ 0.08, "mm" ]
+      - name: "tag_trk_layer_7"
+        material: "G4_Si"
+        size: [ 20.1 , "cm", 10 , "cm", 0.15 , "mm" ] # Layer 7
+        position: [ 0 , "cm", 0 , "cm", 30 , "cm" ] # Layer 7
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 7
+          - [ 0, "radian" , 0 , "radian" , 0.05 , "radian" ] #Layer 7
+        strip_per_layer: 6700
+        # offset to globally move this component (in the mother volume coordinate system)
+        offset: [ 0.08, "mm" ]
+
+  - name: "rec_trk_region"
+    material: "vacuum"
+    position: [ 0, "m", 0, "m", 100, "mm" ]
+    daughters:
+      - name: "rec_trk_layer_1"
+        material: "G4_Si"
+        size: [ 20.1 , "cm", 10  , "cm", 0.15 , "mm" ] # Layer 1
+        position: [ 0 , "cm", 0 , "cm", -86.25 , "mm" ] # Layer 1
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 1
+          - [ 0, "radian" , 0 , "radian" , -0.05 , "radian" ] #Layer 1
+        strip_per_layer: 6700
+        offset: [ 0.08, "mm" ]
+      - name: "rec_trk_layer_2"
+        material: "G4_Si"
+        size: [ 20.1 , "cm", 10  , "cm", 0.15 , "mm" ] # Layer 2
+        position: [ 0 , "cm", 0 , "cm", -71.25 , "mm" ] # Layer 2
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 2
+          - [ 0, "radian" , 0 , "radian" , 0.05 , "radian" ] #Layer 2
+        strip_per_layer: 6700
+        offset: [ 0.08, "mm" ]
+      - name: "rec_trk_layer_3"
+        material: "G4_Si"
+        size: [ 20.1 , "cm", 10  , "cm", 0.15 , "mm" ] # Layer 3
+        position: [ 0 , "cm", 0 , "cm", -55.25 , "mm" ] # Layer 3
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 3
+          - [ 0, "radian" , 0 , "radian" , -0.05 , "radian" ] #Layer 3
+        strip_per_layer: 6700
+        offset: [ 0.08, "mm" ]
+      - name: "rec_trk_layer_4"
+        material: "G4_Si"
+        size: [ 24   , "cm", 11.5, "cm", 0.15 , "mm" ] # Layer 4
+        position: [ 0 , "cm", 0 , "cm", -40.25 , "mm" ] # Layer 4
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 4
+          - [ 0, "radian" , 0 , "radian" , 0.05 , "radian" ] #Layer 4
+        strip_per_layer: 8000
+        offset: [ 0.08, "mm" ]
+      - name: "rec_trk_layer_5"
+        material: "G4_Si"
+        size: [ 36   , "cm", 14  , "cm", 0.15 , "mm" ] # Layer 5
+        position: [ 0 , "cm", 0 , "cm", -4.25  , "mm" ] # Layer 5
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 5
+          - [ 0, "radian" , 0 , "radian" , -0.05 , "radian" ] #Layer 5
+        strip_per_layer: 12000
+        offset: [ 0.08, "mm" ]
+      - name: "rec_trk_layer_6"
+        material: "G4_Si"
+        size: [ 50.1 , "cm", 20  , "cm", 0.15 , "mm" ] # Layer 6
+        position: [ 0 , "cm", 0 , "cm", 86.25  , "mm" ] # Layer 6
+        rotation:
+          - [ 0, "radian" , 0 , "radian" , 0 , "radian" ] #Layer 5
+          - [ 0, "radian" , 0 , "radian" , 0.05 , "radian" ] #Layer 5
+        strip_per_layer: 16700
+        offset: [ 0.08, "mm" ]
+
+calorimeter-like:

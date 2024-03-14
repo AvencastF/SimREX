@@ -58,6 +58,21 @@ IF (ROOT_FOUND)
     link_directories(${ROOT_LIBRARY_DIR})
 ENDIF ()
 
+#----------------------------------------------------------------------------
+# Find Geant4 package, activating all available UI and Vis drivers by default
+# You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
+# to build a batch mode only executable
+#
+option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" ON)
+if (WITH_GEANT4_UIVIS)
+    find_package(Geant4 REQUIRED ui_all vis_all)
+else ()
+    find_package(Geant4 REQUIRED)
+endif ()
+
+include(${Geant4_USE_FILE})
+
+
 ###################################
 # Include Common External Tools   #
 ###################################
@@ -71,8 +86,9 @@ include_directories(external/magic_enum/include)
 ###########
 # Cores   #
 ###########
-add_subdirectory(core)
+set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
 
+add_subdirectory(core)
 
 #################
 # Main Entrance #
@@ -82,13 +98,13 @@ include_directories(${PROJECT_SOURCE_DIR}/core/global-event-model/include)
 add_executable(SimREX SimREX.cpp)
 target_link_libraries(SimREX SimREX::GEM SimREX::Simulation)
 
-
+install(TARGETS SimREX DESTINATION bin)
 
 #########################
 # Doxygen Documentation #
 #########################
 find_package(Doxygen)
-if(DOXYGEN_FOUND)
+if (DOXYGEN_FOUND)
     # Specify the input and output Doxyfile
     set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in)
     set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
@@ -104,6 +120,6 @@ if(DOXYGEN_FOUND)
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMENT "Generating API documentation with Doxygen"
             VERBATIM)
-else()
+else ()
     message(STATUS "Doxygen not found, unable to generate documentation")
-endif()
+endif ()

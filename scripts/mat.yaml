@@ -1,0 +1,29 @@
+---
+# Begin of File
+# For SimREX
+# Default Material Configuration by Yulei Zhang
+
+# IMPORTANT: For yaml, indentation matters!
+
+# Material Building
+build_material:
+  - name: "vacuum"
+    composition: [ "N", 0.7, "O", 0.3 ]
+    density: [ 1e-10, "kg", "m3" ]
+    state: "gas"
+  - name: "CarbonFiber"
+    composition: [ "C", 1.0 ]
+    density: [ 1.93, "g", "cm3" ]
+    state: "solid"
+  - name: "Water"
+    composition: [ "H", 0.67, "O", 0.33 ]
+    density: [ 0.1, "g", "cm3" ]
+    state: "liquid"
+
+# Material Finding
+internal_material:
+  - name: "G4_PLASTIC_SC_VINYLTOLUENE"
+  - name: "G4_Al"
+  - name: "G4_Si"
+  - name: "G4_Ca"
+  - name: "G4_W"

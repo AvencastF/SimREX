@@ -9,8 +9,8 @@ root_generate_dictionary(GEM_dict ${HEADERS} LINKDEF GEMLinkDef.h)
 
 install(TARGETS GEM LIBRARY DESTINATION lib)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libGEM_rdict.pcm DESTINATION lib)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libGEM.rootmap DESTINATION lib)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libGEM_dict_rdict.pcm DESTINATION lib)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libGEM_dict.rootmap DESTINATION lib)
 
 ###########
 # Testing #

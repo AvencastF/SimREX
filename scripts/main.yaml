@@ -1,0 +1,61 @@
+---
+# Begin of File
+# For Phantom
+# Default Running Configuration by Yulei Zhang
+
+# IMPORTANT: For yaml, indentation matters!
+
+material_file: "mat.yaml"
+detector_file: "det_test.yaml"
+
+random_seed: 1
+beam_on: 1000
+threads: 5
+
+verbosity:
+  run: 1
+  event: 0
+  tracking: 0
+  stepping: 0
+
+general_particle_source:
+  # Details for Geant4 general particle source settings
+  source/multiplevertex: true
+  source/intensity: 5
+  particle: "e-"
+  # Energy Setting
+  ene/mono: "250 MeV"
+  #    ene/type: "Lin"
+  #    ene/min: "50 MeV"
+  #    ene/max: "150 MeV"
+  direction: "0 0 1"
+  #position: "0 0 -50 cm"
+  # Square box
+  pos/type: "Plane"
+  pos/shape: "Rectangle"
+  pos/centre: "0 5 -10 mm"
+  pos/halfx: "1 mm"
+  pos/halfy: "3 mm"
+
+###########################################
+# Data Manager Settings
+###########################################
+data_manager:
+  output_file_name: "sim.root"
+  output_tree_name: "sim"
+
+# Truth MC particle will be recorded if satisfied any of the followings
+truth_filter:
+  # Particles being recorded are required to pass the following selections, if they are in this PDG list
+  PDG_applied_to_selections: [ -11, 11, 22 ]
+  # minimal kinetic energy to record the truth particle
+  e_kin_min_record: [ 1.0, "MeV" ]
+
+  # Special settings for recording the truth particle (apply to ALL)
+  # 1. Record all particles
+  record_all: false
+  # 2. Spotless mode, only record the initial step and the final step
+  record_spotless: false
+
+
+
