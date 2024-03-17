@@ -18,11 +18,12 @@
 #include "global-event-model/hit.h"
 #include "global-event-model/particle.h"
 #include "global-event-model/logger.h"
+#include "global-event-model/physics_process_def.h"
 
 using std::vector, std::map, std::array;
 
-namespace SimREX::GEM {
-
+namespace SimREX::GEM
+{
     class event : public TObject {
     public:
         event();
@@ -45,11 +46,11 @@ namespace SimREX::GEM {
             _event_number = eventNumber;
         }
 
-        [[nodiscard]] const array<int, 4> &getRandomNumber() const {
+        [[nodiscard]] const array<int, 4>& getRandomNumber() const {
             return _random_number;
         }
 
-        void setRandomNumber(const array<int, 4> &randomNumber) {
+        void setRandomNumber(const array<int, 4>& randomNumber) {
             _random_number = randomNumber;
         }
 
@@ -61,36 +62,37 @@ namespace SimREX::GEM {
             _event_weight = eventWeight;
         }
 
-        [[nodiscard]] map <TString, vector<hit *>> *getHitCollections() {
+        [[nodiscard]] map<TString, vector<hit*>>* getHitCollections() {
             return &_hit_collections;
         }
 
-        void setHitCollections(const map <TString, vector<hit *>> &hitCollections) {
+        void setHitCollections(const map<TString, vector<hit*>>& hitCollections) {
             _hit_collections = hitCollections;
         }
 
-        [[nodiscard]] vector<particle *> *getMCParticles() {
+        [[nodiscard]] vector<particle*>* getMCParticles() {
             return &_mc_particles;
         }
 
-        void setMCParticles(const vector<particle *> &mcParticles) {
+        void setMCParticles(const vector<particle*>& mcParticles) {
             _mc_particles = mcParticles;
         }
 
         void initialize();
 
         //! Register a hit collection with a given name
-        vector<hit*>* registerHitCollection(const TString &col_name);
+        vector<hit*>* registerHitCollection(const TString& col_name);
 
-        void removeHitCollection(const TString &col_name);
+        void removeHitCollection(const TString& col_name);
 
-        vector<hit *> *getHits(const TString &col_name);
+        vector<hit*>* getHits(const TString& col_name);
 
-        particle *searchParticle(int id);
+        [[nodiscard]] particle* searchParticle(int id) const;
+
+        //! Get physics process name from id
+        [[nodiscard]] TString getProcessName(int id) const;
 
     private:
-
-
         // ---------------------------
         // General event information
         // ---------------------------
@@ -103,21 +105,22 @@ namespace SimREX::GEM {
         // Used for event biasing
         double _event_weight = 1.0;
 
+        // Physics Process definition
+        PhysicsDef _physics_def = {}; //!
 
         // ---------------------------
         // Data Collections
         // ---------------------------
 
-        map <TString, vector<hit *>> _hit_collections = {};
-        vector<particle *> _mc_particles = {};
+        map<TString, vector<hit*>> _hit_collections = {};
+        vector<particle*> _mc_particles = {};
 
 
         // Logger (not recorded in ROOT file)
         std::shared_ptr<spdlog::logger> _logger = nullptr; //!
 
-    ClassDefOverride(event, 1);
+        ClassDefOverride(event, 1);
     };
-
 }
 
 

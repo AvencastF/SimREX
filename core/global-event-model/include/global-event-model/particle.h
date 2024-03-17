@@ -170,7 +170,7 @@ namespace SimREX::GEM {
 
         vector<particle_state> _states = {};
 
-        hit* _hit_cache = nullptr;
+        hit* _hit_cache = nullptr; //!
 
         ClassDefOverride(particle, 1);
     };

@@ -76,12 +76,12 @@ namespace SimREX::GEM {
         /**Default constructor*/
         PhysicsDef() {
             auto* logger_manager = LoggerManager::getInstance();
-            auto logger = logger_manager->createLogger("Physics Process Def");
+            const auto logger = logger_manager->createLogger("Physics Process Def");
 
             for (unsigned int i = 0; i < dPhyTypeVec.size(); ++i) {
                 dPhyTypeMap.insert({dPhyTypeVec.at(i), i});
 
-                logger->info("Physics Process Type: {0} ==> {1}", i, dPhyTypeVec.at(i));
+                logger->debug("Physics Process Type: {0} ==> {1}", i, dPhyTypeVec.at(i));
             }
 
             logger->info("Construction completed with {0} processes.", dPhyTypeVec.size());

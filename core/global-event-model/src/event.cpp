@@ -5,7 +5,8 @@
 #include "global-event-model/event.h"
 #include "global-event-model/logger.h"
 
-namespace SimREX::GEM {
+namespace SimREX::GEM
+{
     event::event() {
         _logger = LoggerManager::getInstance()->createLogger("Event");
     }
@@ -15,8 +16,9 @@ namespace SimREX::GEM {
     }
 
     void event::initialize() {
+#ifdef DEBUG
         _logger->info("Event {0} initialized", _event_number);
-
+#endif
         _run_number = 0;
         _event_number = 0;
         _random_number = {0, 0, 0, 0};
@@ -72,12 +74,16 @@ namespace SimREX::GEM {
         return &_hit_collections[col_name];
     }
 
-    particle* event::searchParticle(int id) {
+    particle* event::searchParticle(int id) const {
         for (auto& p : _mc_particles) {
             if (p->getId() == id) {
                 return p;
             }
         }
         return nullptr;
+    }
+
+    TString event::getProcessName(int id) const {
+        return {_physics_def.dPhyTypeVec.at(id)};
     }
 }

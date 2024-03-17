@@ -6,8 +6,11 @@
 #include "control/database.h"
 
 #include <G4Threading.hh>
+#include <G4Run.hh>
+#include <G4RunManager.hh>
 
-namespace SimREX::Simulation {
+namespace SimREX::Simulation
+{
     run_action::run_action() {
         const auto logger_name =
             G4Threading::IsMasterThread()
@@ -23,12 +26,16 @@ namespace SimREX::Simulation {
         db::Instance()->registerDataManagers(G4Threading::G4GetThreadId());
     }
 
-    void run_action::BeginOfRunAction(const G4Run*) {
+    void run_action::BeginOfRunAction(const G4Run* run) {
         _logger->info("Begin of run action.");
 
         // Only the worker thread needs to create a data manager
         if (!G4Threading::IsMasterThread()) {
-            db::Instance()->getDataManager(G4Threading::G4GetThreadId())->book();
+            const auto dm = db::Instance()->getDataManager(G4Threading::G4GetThreadId());
+            dm->set_number_of_events(run->GetNumberOfEventToBeProcessed()/G4Threading::GetNumberOfRunningWorkerThreads());
+            dm->book();
+
+            // _logger->warn("Number of events to be processed: {}", dm->get_number_of_events());
         }
     }
 

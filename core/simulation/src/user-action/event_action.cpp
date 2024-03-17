@@ -10,7 +10,8 @@
 #include <G4Event.hh>
 #include <G4RunManager.hh>
 
-namespace SimREX::Simulation {
+namespace SimREX::Simulation
+{
     std::array<int, 4> retrieveNumbers(const std::string& str) {
         std::istringstream iss(str);
         std::string line;
@@ -33,13 +34,24 @@ namespace SimREX::Simulation {
 #ifdef DEBUG
         _logger->info("Begin of event {}.", evt->GetEventID());
 #else
-    _logger->info("Running event {}.",  evt->GetEventID());
+        const auto data_manager = db::Instance()->getDataManager(G4Threading::G4GetThreadId());
+
+        if (
+            const auto total_number = data_manager->get_number_of_events();
+            _events_processed % (total_number / _print_module) == 0
+        ) {
+            _logger->info("Processing event {}.", _events_processed);
+        }
+
+        // _logger->info("Running event {}.", evt->GetEventID());
 #endif
 
         G4RunManager::GetRunManager()->StoreRandomNumberStatusToG4Event(1);
     }
 
     void event_action::EndOfEventAction(const G4Event* evt) {
+        _events_processed++;
+
         if (!evt->IsAborted()) {
             // Record random seed numbers
             const G4String& random_numbers_str = G4RunManager::GetRunManager()->GetRandomNumberStatusForThisEvent();

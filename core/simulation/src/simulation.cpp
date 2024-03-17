@@ -44,6 +44,10 @@ namespace SimREX::Simulation {
         // Initialize the control
         db::Instance()->readYAML(_config_path);
 
+        // Set Loggers
+        GEM::LoggerManager::getInstance()->set_log_level(db::Instance()->get<int>("verbosity/logging"));
+
+
         // Overwrite config with command line arguments
         if (_beam_on >= 0) {
             db::Instance()->set("beam_on", _beam_on);
@@ -116,6 +120,7 @@ namespace SimREX::Simulation {
             runManager->BeamOn(beam_on);
         }
 
+        GEM::LoggerManager::getInstance()->flush();
         /* Job termination
         * Free the store: user actions, physics_list and detector_description are
         * owned and deleted by the run manager, so they should not be deleted

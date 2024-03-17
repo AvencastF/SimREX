@@ -11,6 +11,7 @@
 
 // core dependencies
 #include "simulation.h"
+#include "reconstruction.h"
 #include "global-event-model/logger.h"
 
 
@@ -52,7 +53,32 @@ struct SimArgs final : argparse::Args {
     }
 };
 
-struct RecArgs final : argparse::Args {};
+struct RecArgs final : argparse::Args {
+    std::string& config_path = arg("config_path", "Path to the configuration file. [yaml file]");
+    int& random_seed = kwarg(
+        "r,random-seed", "Random seed for whole reconstruction. [override configs]"
+    ).set_default(-1);
+    int& threads = kwarg(
+        "t,threads", "Number of threads to use. [override configs, 0 to use all available cores]"
+    ).set_default(-1);
+    std::string& log_file = kwarg(
+        "l,log-file", "Path to the log file. [optional, not working now]"
+    ).set_default("");
+
+    void welcome() override {
+        std::cout << "Reconstruction using ROOT::RDataFrame" << std::endl;
+    }
+
+    int run() override {
+        this->print();
+        logger->info("SimREX: Reconstruction starts.");
+
+        SimREX::Reconstruction::run_reconstruction(
+            this->config_path, this->random_seed, this->threads, this->log_file
+        );
+        return 0;
+    }
+};
 
 struct Arguments final : argparse::Args {
     SimArgs& sim = subcommand("simulation");

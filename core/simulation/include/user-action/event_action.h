@@ -29,6 +29,9 @@ namespace SimREX::Simulation {
 
     private:
         std::shared_ptr<spdlog::logger> _logger;
+
+        int _events_processed = 0;
+        int _print_module = 25;
     };
 }
 

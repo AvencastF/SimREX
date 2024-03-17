@@ -52,7 +52,7 @@ namespace SimREX::Simulation {
 
         _output_tree->Branch("run_number", &_run_number, "run_number/I");
         _output_tree->Branch("event_number", &_event_number, "event_number/I");
-        _output_tree->Branch("event", "SimREX::GEM::event", &_event, 320000000);
+        _output_tree->Branch("event", "SimREX::GEM::event", &_event, 320000000, 0);
     }
 
     void data_manager::bookHitCollection(const std::string& col_name) const {
@@ -71,7 +71,9 @@ namespace SimREX::Simulation {
         if (_output_file && _output_tree) {
             _output_tree->Fill();
 
+#ifdef DEBUG
             _logger->info("Event: {} filled", _event_number);
+#endif
 
             // Print MC particles for test usage
             // for (const auto& particle : *_event->getMCParticles()) {

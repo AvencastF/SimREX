@@ -13,6 +13,8 @@ beam_on: 1000
 threads: 5
 
 verbosity:
+  # logging level: "trace", "debug", "info", "warning", "error", "fatal", "off"
+  logging: 3
   run: 1
   event: 0
   tracking: 0

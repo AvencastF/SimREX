@@ -20,6 +20,7 @@ namespace SimREX::Simulation {
 
         void WorkerInitialize() const override;
 
+        void WorkerStop() const override;
 
     private:
         std::shared_ptr<spdlog::logger> _logger;

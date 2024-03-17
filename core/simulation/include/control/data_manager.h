@@ -21,7 +21,8 @@
 #include <G4Track.hh>
 #include <G4Event.hh>
 
-namespace SimREX::Simulation {
+namespace SimREX::Simulation
+{
     /**
      * Thread-local data manager
      */
@@ -76,6 +77,14 @@ namespace SimREX::Simulation {
             return _event;
         }
 
+        [[nodiscard]] int get_number_of_events() const {
+            return _number_of_events;
+        }
+
+        void set_number_of_events(int number_of_events) {
+            _number_of_events = number_of_events;
+        }
+
         /*
          * For Filters
          */
@@ -96,6 +105,7 @@ namespace SimREX::Simulation {
     private:
         std::shared_ptr<spdlog::logger> _logger;
         int _thread_id = -1;
+        int _number_of_events = 0;
 
         std::string _output_file_name;
         std::string _output_tree_name;
